@@ -22,7 +22,6 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-
 app.get("/urls", (req, res) => {
   //route to urls ejs flie and return render based on the template vars
   const templateVars = { urls: urlDatabase };
@@ -31,22 +30,18 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   //route to urls ejs flie and return render based on the template vars
-  const templateVars = { id: req.params, longURL: urlDatabase[req.params] };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
 
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
 
-
-
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
-app.get("/set", (req, res) => {
-  const a = 1;
-  res.send(`a = ${a}`);
-});
+// app.get("/set", (req, res) => {
+//   const a = 1;
+//   res.send(`a = ${a}`);
+// });
 
 // app.get("/fetch", (req, res) => {
 //   res.send(`a = ${a}`);
