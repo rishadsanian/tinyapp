@@ -18,6 +18,7 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
       <div class="navbar-nav ml-auto" id="login">
+        <% if(!username) {%>
         <form
           style="
             display: flex;
@@ -45,7 +46,8 @@
             >
               Login
             </button>
-
+          </form>
+            <%} else {%>
             <p
               class="nav-item nav-link"
               style="
@@ -57,10 +59,35 @@
                 font-size: large;
               "
             >
-              Logged in as: <%= username%>
+              Logged in as: <%= username%>!
             </p>
+            <form
+            style="
+              display: flex;
+              flex-direction: row-reverse;
+              align-items: center;
+            "
+            id="logoutForm"
+            class="form-inline"
+            action="/logout"
+            method="POST"
+          >
+            <button
+              type="submit"
+              class="btn btn-login"
+              style="
+                border-color: darkslategray;
+                color: darkslategray;
+                width: 100px;
+                margin: 1em;
+              "
+            >
+              Logout
+            </button>
+            <%}%>
+            </form>
           </div>
-        </form>
+        
       </div>
     </div>
   </nav>

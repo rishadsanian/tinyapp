@@ -107,10 +107,13 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/login", (req, res) => {
   //sets cookie when username logs in
-
   res.cookie("username", req.body.username);
-  //console.log(urlDatabase);
+  res.redirect(`/urls`); //redirects back to the same view
+});
 
+app.post("/logout", (req, res) => {
+  //sets cookie when username logs in
+  res.clearCookie("username");
   res.redirect(`/urls`); //redirects back to the same view
 });
 
