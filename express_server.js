@@ -10,7 +10,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
-const generateRandomString = (urlDatabase) => {//generates short url string
+const generateRandomString = (urlDatabase) => {
+  //generates short url string
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let randomString = "";
@@ -20,21 +21,20 @@ const generateRandomString = (urlDatabase) => {//generates short url string
   }
 
   if (urlDatabase[randomString]) {
+    //EDGECASE if random string already exists
     generateRandomString();
   }
 
   return randomString;
 };
 
-app.get("/", (req, res) => {// home page
+app.get("/", (req, res) => {
+  // home page
   res.send("Hello!");
 });
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
-app.get("/urls.json", (req, res) => {//url database in json format
+app.get("/urls.json", (req, res) => {
+  //url database in json format
   //route for .json urls
   res.json(urlDatabase);
 });
@@ -60,8 +60,24 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
-  console.log(urlDatabase);
+  const randomString = generateRandomString(urlDatabase);
+  urlDatabase[randomString] = req.body.longURL; // Log the POST request body to the console
+
+  //route to urls show ejs flie and return render based on the template vars
+  const templateVars = {
+    id: randomString,
+    longURL: urlDatabase[randomString],
+  };
+  res.render("urls_show", templateVars);
+});
+
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+  return;
+});
+
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
