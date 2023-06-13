@@ -28,6 +28,16 @@ const generateRandomString = (urlDatabase) => {
   return randomString;
 };
 
+const addHttpToURL = (url) => {
+  //to handle edgecases when http:// is not added
+  //use - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith
+
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    url = "http://" + url;
+  }
+  return url;
+};
+
 app.get("/", (req, res) => {
   // home page
   res.send("Hello!");
@@ -62,9 +72,9 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   // creates a new entry from the urls_new page.
   //TODO EDGECASE -> if long url already exist.
-  //TODO EDGECASE -> adds http/https if not included
+  //TODO EDGECASE -> adds http/https if not included - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith --need to test
   const randomString = generateRandomString(urlDatabase);
-  urlDatabase[randomString] = req.body.longURL; // Log the POST request body to the console
+  urlDatabase[randomString] = addHttpToURL(req.body.longURL);
 
   //route to urls show ejs flie and return render based on the template vars
 
@@ -79,15 +89,15 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  //deletes an entry from urls_index page
+  //deletes an entry from urls_index page and urlDatabase
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
 
 app.post("/urls/:id", (req, res) => {
   //updates long url for an existing short url via the urlshow page's edit section
-  urlDatabase[req.params.id] = req.body.longURL;
-  console.log(urlDatabase);
+  urlDatabase[req.params.id] = addHttpToURL(req.body.longURL);
+  //console.log(urlDatabase);
 
   res.redirect(`/urls/${req.params.id}`); //changed from res - urls show to redirect
 });
