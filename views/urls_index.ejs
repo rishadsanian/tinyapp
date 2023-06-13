@@ -11,9 +11,19 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
+    <style>
+      .btn-delete {
+        border-color: #f44336;
+        color: red;
+      }
+
+      .btn-delete:hover {
+        background: #f44336;
+        color: white;
+      }
+    </style>
     <title>TinyApp</title>
   </head>
-
 
   <body>
     <%- include('partials/_header'); %>
@@ -24,6 +34,7 @@
           <tr>
             <th scope="col">Short URL ID</th>
             <th scope="col">Long URL</th>
+            <th scope="col">Delete</th>
           </tr>
         </thead>
         <tbody>
@@ -31,6 +42,11 @@
           <tr>
             <td><%= id %></td>
             <td><%= urls[id] %></td>
+            <td>
+              <form method="POST" action="/urls/9sm5xK/delete">
+                <button type="submit" class="btn btn-delete">Delete</button>
+              </form>
+            </td>
           </tr>
           <% } %>
         </tbody>
@@ -53,7 +69,5 @@
       integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
       crossorigin="anonymous"
     ></script>
-
-
   </body>
 </html>

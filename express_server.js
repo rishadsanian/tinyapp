@@ -77,7 +77,6 @@ app.get("/u/:id", (req, res) => {
   return;
 });
 
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
