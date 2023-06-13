@@ -29,10 +29,11 @@ const generateRandomString = (urlDatabase) => {
 };
 
 const addHttpToURL = (url) => {
-  //to handle edgecases when http:// is not added
+  //to handle edgecases ONLY when http:// is not added
   //use - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith
 
   if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    //checks for http:// and https://
     url = "http://" + url;
   }
   return url;
@@ -72,13 +73,13 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   // creates a new entry from the urls_new page.
   //TODO EDGECASE -> if long url already exist.
-  //TODO EDGECASE -> adds http/https if not included - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith --need to test
+  //TODO EDGECASE -> adds http/https if not included - done
   const randomString = generateRandomString(urlDatabase);
   urlDatabase[randomString] = addHttpToURL(req.body.longURL);
 
   //route to urls show ejs flie and return render based on the template vars
 
-  res.redirect(`/urls/${randomString}`); // changed from res - urls show to redirect
+  res.redirect(`/urls/${randomString}`); //redirects back to the same view
 });
 
 app.get("/u/:id", (req, res) => {
@@ -99,7 +100,7 @@ app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = addHttpToURL(req.body.longURL);
   //console.log(urlDatabase);
 
-  res.redirect(`/urls/${req.params.id}`); //changed from res - urls show to redirect
+  res.redirect(`/urls/${req.params.id}`); //redirects back to the same view
 });
 
 app.listen(PORT, () => {
