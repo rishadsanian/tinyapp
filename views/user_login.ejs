@@ -13,38 +13,40 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>- TinyApp - User Login</title>
+    <title>Login - TinyApp</title>
   </head>
   <body>
     <%- include('partials/_header.ejs') %>
     <main style="margin: 1em">
-      <h3>User Login</h3>
+      <h3 style="font-weight: 600; margin-bottom: 0">Login</h3>
       <br />
 
       <form action="/login" method="POST">
         <div class="form-group mb-2">
-          <label for="email">Enter email:</label>
+          <label for="email" style="font-weight: 500">Email Address</label>
           <input
             class="form-control"
             id="email"
             type="email"
             name="email"
-            placeholder="account@email.com"
+            placeholder="Enter email"
             style="width: 300px; margin-bottom: 1em"
           />
 
-          <label for="password">Enter password:</label>
+          <label for="password" style="font-weight: 500">Password</label>
           <input
             class="form-control"
             id="password"
             type="password"
             name="password"
-            placeholder=""
+            placeholder="Password"
             style="width: 300px; margin-bottom: 1em"
           />
         </div>
         <div class="form-group">
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="submit" class="btn btn-primary" style="width: 5em">
+            Login
+          </button>
         </div>
       </form>
     </main>

@@ -38,15 +38,10 @@ const users = {
 };
 
 //JSON DATAS
-
 //url database in json format and route for .json urls
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
-//CURRENT USER can user object be defined here?
-// let currentUser = {};
-// let userID;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -170,7 +165,7 @@ app.post("/urls/:id", (req, res) => {
 // ./register (user_register.ejs)  USER REGISTRATION PAGE WITH USER EMAIL AND PASSWORD FORM
 
 app.get("/register", (req, res) => {
-  const templateVars = { user: users[req.cookies.user_id] }; //todo add username
+  const templateVars = { user: users[req.cookies.user_id] };
   res.render(`user_register`, templateVars);
 });
 
@@ -178,27 +173,28 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   //validation
 
-  //if the e-mail or password are empty strings, send back a response with the 400 status code.
+  //Check empty email or passwords
   if (!req.body.email || !req.body.password) {
     console.log("Incomplete Form");
     return res.status(400).send("Email and password are required.");
   }
 
-  //if email exists in database
+  //Check for duplicate registration
   if (findUserByEmail(req.body.email) !== null) {
     return res.status(400).send("Email already exists.");
   }
 
   //create new user
-  const userID = "user" + generateRandomString(users);
+  const userId = "user" + generateRandomString(users);
 
-  users[userID] = {
-    id: userID,
+  users[userId] = {
+    id: userId,
     email: req.body.email,
     password: req.body.password, //todo hash for security
   };
 
-  res.cookie("user_id", userID);
+  //Set cookies and redirect to /urls
+  res.cookie("user_id", userId);
   console.log("User Database", users);
   res.redirect(`/urls`);
 });
@@ -208,20 +204,37 @@ app.post("/register", (req, res) => {
 // ./login (user_login.ejs) - ALLOWS USERS TO CREATE A NEW ACCOUNT WITH AN EMAIL AND PASSWORD FORM
 
 app.get("/login", (req, res) => {
-  const templateVars = { user: users[req.cookies.user_id] }; //todo add username
+  const templateVars = { user: users[req.cookies.user_id] };
   res.render(`user_login`, templateVars);
 });
 
-//sets cookie when user logs in
 app.post("/login", (req, res) => {
-  res.cookie("user_id");
+  //Validate
+
+  //Check Email
+  if (!findUserByEmail(req.body.email)) {
+    return res.status(403).send("Invalid email or password");
+  }
+
+  //valid userid
+  const userId = findUserByEmail(req.body.email).id;
+
+  //Check Password
+  if (users[userId].password !== req.body.password) {
+    return res.status(403).send("Invalid email or password");
+  }
+
+  //sets cookie when user logs in and redirects to /urls
+  res.cookie("user_id", userId);
   res.redirect(`/urls`); //redirects back to the same view
 });
+
+// ----------------------------------------------------------------------------
 
 //deletes cookie when user logs out
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect(`/urls`); //redirects back to the same view
+  res.redirect(`/login`); //redirects back to the same view
 });
 
 ///////////////////////////////////////////////////////////////////////////////
