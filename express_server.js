@@ -167,23 +167,8 @@ app.post("/urls/:id", (req, res) => {
 
 ///////////////// USER DATA GET - POSTS RENDERS/REDIRECTS //////////////////////
 
-// ./login (page not made yet)
+// ./register (user_register.ejs)  USER REGISTRATION PAGE WITH USER EMAIL AND PASSWORD FORM
 
-//sets cookie when user logs in
-app.post("/login", (req, res) => {
-  res.cookie("user_id");
-  res.redirect(`/urls`); //redirects back to the same view
-});
-
-//deletes cookie when user logs out
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
-  res.redirect(`/urls`); //redirects back to the same view
-});
-
-// ./register USER REGISTRATION PAGE WITH USER EMAIL AND PASSWORD FORM
-
-//redirects to long url when clicked from urls_show page.
 app.get("/register", (req, res) => {
   const templateVars = { user: users[req.cookies.user_id] }; //todo add username
   res.render(`user_register`, templateVars);
@@ -207,8 +192,6 @@ app.post("/register", (req, res) => {
   //create new user
   const userID = "user" + generateRandomString(users);
 
-  // If someone tries to register with an email that is already in the users object, send back a response with the 400 status code.
-
   users[userID] = {
     id: userID,
     email: req.body.email,
@@ -218,6 +201,27 @@ app.post("/register", (req, res) => {
   res.cookie("user_id", userID);
   console.log("User Database", users);
   res.redirect(`/urls`);
+});
+
+// ----------------------------------------------------------------------------
+
+// ./login (user_login.ejs) - ALLOWS USERS TO CREATE A NEW ACCOUNT WITH AN EMAIL AND PASSWORD FORM
+
+app.get("/login", (req, res) => {
+  const templateVars = { user: users[req.cookies.user_id] }; //todo add username
+  res.render(`user_login`, templateVars);
+});
+
+//sets cookie when user logs in
+app.post("/login", (req, res) => {
+  res.cookie("user_id");
+  res.redirect(`/urls`); //redirects back to the same view
+});
+
+//deletes cookie when user logs out
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect(`/urls`); //redirects back to the same view
 });
 
 ///////////////////////////////////////////////////////////////////////////////
