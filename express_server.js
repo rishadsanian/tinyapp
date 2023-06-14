@@ -117,6 +117,14 @@ app.post("/logout", (req, res) => {
   res.redirect(`/urls`); //redirects back to the same view
 });
 
+app.get("/register", (req, res) => {
+  //redirects to long url when clicked from urls_show page.
+  // const longURL = urlDatabase[req.params.id];
+  const templateVars = { username: req.cookies["username"] };
+  res.render(`user_register`, templateVars);
+  return;
+});
+
 app.listen(PORT, () => {
   //server listening
   console.log(`Example app listening on port ${PORT}!`);
