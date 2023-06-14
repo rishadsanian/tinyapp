@@ -4,13 +4,6 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 
-//middleware
-app.set("view engine", "ejs"); //ejs setup as view engine
-app.use(express.urlencoded({ extended: true })); //built in express encoding used for reading/parsing post body
-app.use(cookieParser()); //cookieParser set to use as encoding for cookies
-//nodemon - used to restart server on changes automatically
-// todo setup morgan and use
-
 ////////////////////////////////////////////////////////////////////////////////
 
 //server
@@ -18,6 +11,15 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 ////////////////////////////////////////////////////////////////////////////////
+
+//middleware
+app.set("view engine", "ejs"); //ejs setup as view engine
+app.use(express.urlencoded({ extended: true })); //built in express encoding used for reading/parsing post body
+app.use(cookieParser()); //cookieParser set to use as encoding for cookies
+//nodemon - used to restart server on changes automatically
+// todo setup morgan and use
+
+///////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////OBJECTS and VARIABLES/////////////////////////////////
 
@@ -30,6 +32,9 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+//USER DATABASE
+const users = {};
+
 //JSON DATAS
 
 //url database in json format and route for .json urls
@@ -37,12 +42,16 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+//CURRENT USER can user object be defined here?
+// let currentUser = {};
+// let userID;
+
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////HELPER FUNCTIONS///////////////////////////////////
 
-//generates short url string
-const generateRandomString = (urlDatabase) => {
+//generates a random short url string  //todo - refactor to single function with below
+const generateRandomString = (database) => {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let randomString = "";
@@ -50,24 +59,36 @@ const generateRandomString = (urlDatabase) => {
     randomString += characters[Math.floor(Math.random() * characters.length)];
   }
 
-  //EDGECASE if random string already exists
-  if (urlDatabase[randomString]) {
-    generateRandomString();
+  //EDGECASE if random string already exists in database
+  if (database[randomString]) {
+    generateRandomString(database);
   }
 
   return randomString;
 };
+
 //------------------------------------------------------------------------------
 
-//to handle edgecases ONLY when http:// is not added
-const addHttpToURL = (url) => {
-  //use - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith
+//to handle edgecases for ONLY when http:// is not added / checks for http and https
 
+const addHttpToURL = (url) => {
   if (!url.startsWith("http://") && !url.startsWith("https://")) {
-    //checks for http:// and https://
     url = "http://" + url;
   }
   return url;
+};
+
+//------------------------------------------------------------------------------
+
+//function checks if an email exists in the user database and returns the full user object or null
+
+const findUserByEmail = (email) => {
+  for (const user in users) {
+    if (user.email === email) {
+      return users[user];
+    }
+    return null;
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -85,7 +106,7 @@ app.get("/", (req, res) => {
 
 //route to urls ejs flie and return render based on the template vars
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
   res.render("urls_index", templateVars);
 });
 
@@ -101,7 +122,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //routes to urlsnew view
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = { user: users[req.cookies.user_id] };
   res.render("urls_new", templateVars);
 });
 app.post("/urls", (req, res) => {
@@ -122,7 +143,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"],
+    user: users[req.cookies.user_id],
   };
   res.render("urls_show", templateVars);
 });
@@ -146,26 +167,45 @@ app.post("/urls/:id", (req, res) => {
 
 // ./login (page not made yet)
 
-//sets cookie when username logs in
+//sets cookie when user logs in
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+  res.cookie("user_id");
   res.redirect(`/urls`); //redirects back to the same view
 });
 
-//deletes cookie when username logs out
+//deletes cookie when user logs out
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect(`/urls`); //redirects back to the same view
 });
 
-// ./register USER REGISTRATION PAGE WITH USERNAME AND PASSWORD FORM
+// ./register USER REGISTRATION PAGE WITH USER EMAIL AND PASSWORD FORM
 
+//redirects to long url when clicked from urls_show page.
 app.get("/register", (req, res) => {
-  //redirects to long url when clicked from urls_show page.
-  // const longURL = urlDatabase[req.params.id];
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = { user: users[req.cookies.user_id] }; //todo add username
   res.render(`user_register`, templateVars);
-  return;
+});
+
+//saves user settings in users object
+app.post("/register", (req, res) => {
+  //   If the e-mail or password are empty strings, send back a response with the 400 status code.
+  if (!req.body.email || !req.body.password) {
+    console.log("no user");
+  }
+
+  const userID = "user" + generateRandomString(users);
+
+  // If someone tries to register with an email that is already in the users object, send back a response with the 400 status code.
+
+  users[userID] = {
+    id: userID,
+    email: req.body.email,
+    password: req.body.password, //todo hash for security
+  };
+
+  res.cookie("user_id", userID);
+  res.redirect(`/urls`);
 });
 
 ///////////////////////////////////////////////////////////////////////////////

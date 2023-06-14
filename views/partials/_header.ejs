@@ -18,7 +18,7 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
       <div class="navbar-nav ml-auto" id="login">
-        <% if(!username) {%>
+        <% if(!user) {%>
         <form
           style="
             display: flex;
@@ -31,15 +31,9 @@
           method="POST"
         >
           <div class="nav-item nav-link">
-            <label for="username"></label>
-            <input
-              class="form-control"
-              type="text"
-              name="username"
-              placeholder="Username"
-              style="width: 300px; margin: 1em"
-            />
+          
             <button
+            id="login"
               type="submit"
               class="btn btn-login"
               style="border-color: darkslategray; color: darkslategray"
@@ -59,7 +53,7 @@
                 font-size: large;
               "
             >
-              Logged in as: <%= username%>!
+              Logged in as: <%= user.email%>
             </p>
             <form
             style="
