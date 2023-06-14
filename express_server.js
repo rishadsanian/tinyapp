@@ -2,8 +2,14 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 8080; // default port 8080
+//middleware
+
+//nodemon - used
+// todo setup morgan and use
+
+//View Engine - EJS
 app.set("view engine", "ejs"); //ejs setup
-app.use(express.urlencoded({ extended: true })); //encoding used for reading post body
+app.use(express.urlencoded({ extended: true })); //encoding used for reading/parsing post body
 app.use(cookieParser()); //cookieParser set to use
 
 const urlDatabase = {
