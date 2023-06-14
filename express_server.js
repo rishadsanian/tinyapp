@@ -33,7 +33,9 @@ const urlDatabase = {
 };
 
 //USER DATABASE
-const users = {};
+const users = {
+  admin1: { id: "admin1", email: "admin@tinyapp.com", password: "test" },
+};
 
 //JSON DATAS
 
@@ -50,7 +52,7 @@ app.get("/urls.json", (req, res) => {
 
 ////////////////////////////HELPER FUNCTIONS///////////////////////////////////
 
-//generates a random short url string  //todo - refactor to single function with below
+//generates a random short url string  - used for generating short url and userid
 const generateRandomString = (database) => {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -69,7 +71,7 @@ const generateRandomString = (database) => {
 
 //------------------------------------------------------------------------------
 
-//to handle edgecases for ONLY when http:// is not added / checks for http and https
+//function to handle edgecases for ONLY when http:// is not added / checks for http and https in long urls
 
 const addHttpToURL = (url) => {
   if (!url.startsWith("http://") && !url.startsWith("https://")) {
@@ -84,7 +86,7 @@ const addHttpToURL = (url) => {
 
 const findUserByEmail = (email) => {
   for (const user in users) {
-    if (user.email === email) {
+    if (users[user].email === email) {
       return users[user];
     }
     return null;
@@ -189,11 +191,20 @@ app.get("/register", (req, res) => {
 
 //saves user settings in users object
 app.post("/register", (req, res) => {
-  //   If the e-mail or password are empty strings, send back a response with the 400 status code.
+  //validation
+
+  //if the e-mail or password are empty strings, send back a response with the 400 status code.
   if (!req.body.email || !req.body.password) {
-    console.log("no user");
+    console.log("Incomplete Form");
+    return res.status(400).send("Email and password are required.");
   }
 
+  //if email exists in database
+  if (findUserByEmail(req.body.email) !== null) {
+    return res.status(400).send("Email already exists.");
+  }
+
+  //create new user
   const userID = "user" + generateRandomString(users);
 
   // If someone tries to register with an email that is already in the users object, send back a response with the 400 status code.
@@ -205,6 +216,7 @@ app.post("/register", (req, res) => {
   };
 
   res.cookie("user_id", userID);
+  console.log("User Database", users);
   res.redirect(`/urls`);
 });
 
@@ -215,5 +227,5 @@ app.post("/register", (req, res) => {
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
 });
-
+console.log(users);
 ////////////////////////////////////////////////////////////////////////////////
