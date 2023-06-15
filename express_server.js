@@ -1,5 +1,14 @@
 ///////////////////////////TINYAPP SERVER FILE/////////////////////////////////
 
+//////////////////////////////todo wishlist////////////////////////////////////
+/*
+error message html view wit header message and back button/link
+all post security - stop making new users if not authorized
+long url duplicate per user
+copy shorturl from urlshow
+*/
+//////////////////////////////////////////////////////////////////////////////
+
 //Modules, Packages and files required
 const express = require("express");
 const cookieParser = require("cookie-parser");
@@ -122,15 +131,26 @@ app.post("/urls/:id/delete", (req, res) => {
 //routes to urlsnew view
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: users[req.cookies.user_id] };
-  res.render("urls_new", templateVars);
+
+  !templateVars.user
+    ? res.redirect(`/login`)
+    : res.render(`urls_new`, templateVars);
 });
 app.post("/urls", (req, res) => {
   // creates a new entry from the urls_new page.
-  //TODO EDGECASE -> if long url already exist.
-  //TODO EDGECASE -> adds http/https if not included - done
-  const randomString = generateRandomString(urlDatabase);
-  urlDatabase[randomString] = addHttpToURL(req.body.longURL);
-  res.redirect(`/urls/${randomString}`); //redirects back to the urls/:id view
+
+  if (!req.cookies.user_id) {
+    return res
+      .status(401)
+      .send(
+        `<html> <p> Error: Unauthorized user. You need to log in to view this page.</p> </html> \n`
+      );
+  }
+  if (req.cookies.user_id) {
+    const randomString = generateRandomString(urlDatabase);
+    urlDatabase[randomString] = addHttpToURL(req.body.longURL); //adds http
+    res.redirect(`/urls/${randomString}`);
+  } //redirects back to the urls/:id view
 });
 
 // ----------------------------------------------------------------------------
@@ -147,17 +167,27 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-//redirects to long url when clicked from urls_show page.
-app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
-  return;
-});
-
 //updates long url for an existing short url via the urlshow page's edit section
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = addHttpToURL(req.body.longURL);
   res.redirect(`/urls/${req.params.id}`); //redirects back to the same view
+});
+
+// ----------------------------------------------------------------------------
+
+// /u/:id REDIRECTS TO LONG URL FROM SHORT URL
+
+app.get("/u/:id", (req, res) => {
+  if (!(req.params.id in urlDatabase)) {
+    return res
+      .status(404)
+      .send(
+        `<html> <p> Error: ${req.params.id} is not a valid short url.</p> </html> \n`
+      );
+  }
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
+  return;
 });
 
 ////////////////////////////////////////////////////////////////////////////////
