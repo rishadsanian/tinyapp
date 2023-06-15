@@ -2,10 +2,9 @@
 
 //////////////////////////////todo wishlist////////////////////////////////////
 /*
-error message html view withheader message and back button/link
 error view page with dynamic messaging based on error code/handler
-long url duplicate warning for user
-copy shorturl from urlshow/urls index page
+long url duplicate entry warning for user
+copy shorturl button from urlshow/urls index page
 */
 //////////////////////////////////////////////////////////////////////////////
 
