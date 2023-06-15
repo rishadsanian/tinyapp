@@ -13,7 +13,7 @@ copy shorturl from urlshow
 //Modules, Packages and files required
 const express = require("express");
 const cookieParser = require("cookie-parser");
-
+const bcrypt = require("bcryptjs");
 ////////////////////////////////////////////////////////////////////////////////
 
 //server
@@ -44,7 +44,11 @@ const urlDatabase = {
 
 //USER DATABASE
 const users = {
-  admin1: { id: "admin1", email: "admin@tinyapp.com", password: "test" },
+  admin1: {
+    id: "admin1",
+    email: "admin@tinyapp.com",
+    password: bcrypt.hashSync("test", 10),
+  },
 };
 
 //JSON DATAS
@@ -293,10 +297,14 @@ app.post("/register", (req, res) => {
   //create new user
   const userId = "user" + generateRandomString(users);
 
+  //password security
+  const password = req.body.password; // found in the req.body object
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   users[userId] = {
     id: userId,
     email: req.body.email,
-    password: req.body.password, //todo hash for security
+    password: hashedPassword, //todo hash for security
   };
 
   //Set cookies and redirect to /urls
@@ -328,7 +336,7 @@ app.post("/login", (req, res) => {
   const userId = findUserByEmail(req.body.email).id;
 
   //Check Password
-  if (users[userId].password !== req.body.password)
+  if (!bcrypt.compareSync(req.body.password, users[userId].password))
     return handleInvalidCredentials(req, res);
 
   //Set cookie when user logs in and redirects to /urls
@@ -352,6 +360,7 @@ app.post("/logout", (req, res) => {
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
 });
+
 console.log(users);
 console.log(urlDatabase);
 
