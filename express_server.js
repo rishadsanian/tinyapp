@@ -12,22 +12,36 @@ copy shorturl from urlshow
 
 //Modules, Packages and files required
 const express = require("express");
-const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
+const morgan = require("morgan");
 ////////////////////////////////////////////////////////////////////////////////
 
-//server
+//Server
 const app = express();
 const PORT = 8080; // default port 8080
 
 ////////////////////////////////////////////////////////////////////////////////
 
-//middleware
+//Middleware setup
 app.set("view engine", "ejs"); //ejs setup as view engine
 app.use(express.urlencoded({ extended: true })); //built in express encoding used for reading/parsing post body
-app.use(cookieParser()); //cookieParser set to use as encoding for cookies
+
 //nodemon - used to restart server on changes automatically
-// todo setup morgan and use
+
+// Security SALT
+const salt = bcrypt.genSaltSync(10);
+app.use(
+  cookieSession({
+    name: "session",
+    keys: [salt, salt, salt],
+
+    // Cookie Options
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  })
+);
+
+app.use(morgan("dev"));
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -47,7 +61,7 @@ const users = {
   admin1: {
     id: "admin1",
     email: "admin@tinyapp.com",
-    password: bcrypt.hashSync("test", 10),
+    password: bcrypt.hashSync("test", salt),
   },
 };
 
@@ -93,8 +107,8 @@ const addHttpToURL = (url) => {
 
 //function checks if an email exists in the user database and returns the full user object or null
 
-const findUserByEmail = (email) => {
-  for (const user in users) {
+const findUserByEmail = (email, database) => {
+  for (const user in database) {
     if (users[user].email === email) {
       return users[user];
     }
@@ -119,8 +133,6 @@ const urlsForUser = (id) => {
 //------------------------------------------------------------------------------
 
 //functions to handle 400s status codes
-
-//users
 
 const handleUnauthenticatedUser = (req, res) => {
   return res
@@ -147,7 +159,7 @@ const handleInvalidUrl = (req, res) => {
 };
 
 const handleUnauthorizedAccess = (req, res) => {
-  if (!Object.keys(urlsForUser(req.cookies.user_id)).includes(req.params.id)) {
+  if (!Object.keys(urlsForUser(req.session.userID)).includes(req.params.id)) {
     return res
       .status(403)
       .send(
@@ -161,7 +173,7 @@ const handleUnauthorizedAccess = (req, res) => {
 //////// ./ HOMEPAGE REDIRECTS TO URLS IF LOGGED IN OR LOGIN PAGE IF NOT////////
 
 app.get("/", (req, res) => {
-  !req.cookies.user_id ? res.redirect(`/login`) : res.redirect(`/urls`);
+  !req.session.userID ? res.redirect(`/login`) : res.redirect(`/urls`);
 });
 
 //////////////////////// URL DATA ENDPOINTS GET/POST  //////////////////////////
@@ -171,11 +183,11 @@ app.get("/", (req, res) => {
 //route to urls ejs flie and return render based on the template vars
 app.get("/urls", (req, res) => {
   //validate
-  if (!req.cookies.user_id) return handleUnauthenticatedUser(req, res);
+  if (!req.session.userID) return handleUnauthenticatedUser(req, res);
 
   const templateVars = {
-    urls: urlsForUser(req.cookies.user_id), //
-    user: users[req.cookies.user_id],
+    urls: urlsForUser(req.session.userID), //
+    user: users[req.session.userID],
   };
 
   res.render("urls_index", templateVars);
@@ -184,9 +196,9 @@ app.get("/urls", (req, res) => {
 //deletes an entry from urls_index page and urlDatabase
 app.post("/urls/:id/delete", (req, res) => {
   //validate
-  if (!req.cookies.user_id) return handleUnauthenticatedUser(req, res);
+  if (!req.session.userID) return handleUnauthenticatedUser(req, res);
   if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
-  if (!Object.keys(urlsForUser(req.cookies.user_id)).includes(req.params.id))
+  if (!Object.keys(urlsForUser(req.session.userID)).includes(req.params.id))
     return handleUnauthorizedAccess(req, res);
 
   delete urlDatabase[req.params.id];
@@ -199,7 +211,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //routes to urlsnew view
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: users[req.cookies.user_id] };
+  const templateVars = { user: users[req.session.userID] };
 
   !templateVars.user
     ? res.redirect(`/login`)
@@ -208,13 +220,13 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   // creates a new entry from the urls_new page.
 
-  if (!req.cookies.user_id) return handleUnauthenticatedUser(req, res);
+  if (!req.session.userID) return handleUnauthenticatedUser(req, res);
 
-  if (req.cookies.user_id) {
+  if (req.session.userID) {
     const randomString = generateRandomString(urlDatabase);
     urlDatabase[randomString] = {
       longURL: addHttpToURL(req.body.longURL),
-      userId: req.cookies.user_id,
+      userId: req.session.userID,
     }; //adds http
     res.redirect(`/urls/${randomString}`);
   } //redirects back to the urls/:id view
@@ -227,15 +239,15 @@ app.post("/urls", (req, res) => {
 //route to urls show ejs flie and return render based on the template vars
 app.get("/urls/:id", (req, res) => {
   //Validate
-  if (!req.cookies.user_id) return handleUnauthenticatedUser(req, res);
+  if (!req.session.userID) return handleUnauthenticatedUser(req, res);
   if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
-  if (!Object.keys(urlsForUser(req.cookies.user_id)).includes(req.params.id))
+  if (!Object.keys(urlsForUser(req.session.userID)).includes(req.params.id))
     return handleUnauthorizedAccess(req, res);
 
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
-    user: users[req.cookies.user_id],
+    user: users[req.session.userID],
   };
 
   res.render("urls_show", templateVars);
@@ -244,9 +256,9 @@ app.get("/urls/:id", (req, res) => {
 //updates long url for an existing short url via the urlshow page's edit section
 app.post("/urls/:id", (req, res) => {
   //validate
-  if (!req.cookies.user_id) return handleUnauthenticatedUser(req, res);
+  if (!req.session.userID) return handleUnauthenticatedUser(req, res);
   if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
-  if (!Object.keys(urlsForUser(req.cookies.user_id)).includes(req.params.id))
+  if (!Object.keys(urlsForUser(req.session.userID)).includes(req.params.id))
     return handleUnauthorizedAccess(req, res);
 
   urlDatabase[req.params.id].longURL = addHttpToURL(req.body.longURL);
@@ -273,7 +285,7 @@ app.get("/u/:id", (req, res) => {
 // ./register (user_register.ejs)  USER REGISTRATION PAGE WITH USER EMAIL AND PASSWORD FORM
 
 app.get("/register", (req, res) => {
-  const templateVars = { user: users[req.cookies.user_id] };
+  const templateVars = { user: users[req.session.userID] };
 
   !templateVars.user
     ? res.render(`user_register`, templateVars)
@@ -290,7 +302,7 @@ app.post("/register", (req, res) => {
   }
 
   //Check for duplicate emails for reg
-  if (findUserByEmail(req.body.email) !== null) {
+  if (findUserByEmail(req.body.email, users) !== null) {
     return res.status(409).send("User already exists.");
   }
 
@@ -299,7 +311,7 @@ app.post("/register", (req, res) => {
 
   //password security
   const password = req.body.password; // found in the req.body object
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  const hashedPassword = bcrypt.hashSync(password, salt);
 
   users[userId] = {
     id: userId,
@@ -308,7 +320,7 @@ app.post("/register", (req, res) => {
   };
 
   //Set cookies and redirect to /urls
-  res.cookie("user_id", userId);
+  req.session.userID = userId;
   console.log("User Database", users);
   res.redirect(`/urls`);
 });
@@ -318,7 +330,7 @@ app.post("/register", (req, res) => {
 // ./login (user_login.ejs) - ALLOWS USERS TO CREATE A NEW ACCOUNT WITH AN EMAIL AND PASSWORD FORM
 
 app.get("/login", (req, res) => {
-  const templateVars = { user: users[req.cookies.user_id] };
+  const templateVars = { user: users[req.session.userID] };
 
   !templateVars.user
     ? res.render(`user_login`, templateVars)
@@ -329,18 +341,18 @@ app.post("/login", (req, res) => {
   //Validate
 
   //Check Email
-  if (!findUserByEmail(req.body.email))
+  if (!findUserByEmail(req.body.email, users))
     return handleInvalidCredentials(req, res);
 
   //Lookup valid userid by email
-  const userId = findUserByEmail(req.body.email).id;
+  const userId = findUserByEmail(req.body.email, users).id;
 
   //Check Password
   if (!bcrypt.compareSync(req.body.password, users[userId].password))
     return handleInvalidCredentials(req, res);
 
   //Set cookie when user logs in and redirects to /urls
-  res.cookie("user_id", userId);
+  req.session.userID = userId;
   res.redirect(`/urls`);
 });
 
@@ -349,7 +361,7 @@ app.post("/login", (req, res) => {
 // /logout DELETES COOKIES WHEN LOGOUT AND REDIRECT TO LOGIN
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect(`/login`);
 });
 
