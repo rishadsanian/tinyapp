@@ -88,9 +88,11 @@ const findUserByEmail = (email) => {
   return null;
 };
 
+//------------------------------------------------------------------------------
+
 ///////////////////////////////////////////////////////////////////////////////
 
-///////////////// URL DATA GET - POSTS RENDERS/REDIRECTS //////////////////////
+///////////////// URL DATA ENDPOINTS GET/POST  //////////////////////
 
 // home page
 app.get("/", (req, res) => {
@@ -160,13 +162,16 @@ app.post("/urls/:id", (req, res) => {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-///////////////// USER DATA GET - POSTS RENDERS/REDIRECTS //////////////////////
+///////////////// USER DATA ENDPOINTS GET/POST //////////////////////
 
 // ./register (user_register.ejs)  USER REGISTRATION PAGE WITH USER EMAIL AND PASSWORD FORM
 
 app.get("/register", (req, res) => {
   const templateVars = { user: users[req.cookies.user_id] };
-  res.render(`user_register`, templateVars);
+
+  !templateVars.user
+    ? res.render(`user_register`, templateVars)
+    : res.redirect(`/urls`);
 });
 
 //saves user settings in users object
@@ -179,7 +184,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email and password are required.");
   }
 
-  //Check for duplicate registration //todo - doesn't work with new registrations
+  //Check for duplicate emails for reg
   if (findUserByEmail(req.body.email) !== null) {
     return res.status(400).send("Email already exists.");
   }
@@ -205,7 +210,10 @@ app.post("/register", (req, res) => {
 
 app.get("/login", (req, res) => {
   const templateVars = { user: users[req.cookies.user_id] };
-  res.render(`user_login`, templateVars);
+
+  !templateVars.user
+    ? res.render(`user_login`, templateVars)
+    : res.redirect(`/urls`);
 });
 
 app.post("/login", (req, res) => {
@@ -224,22 +232,23 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid email or password");
   }
 
-  //sets cookie when user logs in and redirects to /urls //doesn't log in with new users but only with existing
+  //sets cookie when user logs in and redirects to /urls
   res.cookie("user_id", userId);
-  res.redirect(`/urls`); //redirects back to the same view
+  res.redirect(`/urls`);
 });
 
 // ----------------------------------------------------------------------------
 
-//deletes cookie when user logs out
+// /logout DELETES COOKIES WHEN LOGOUT AND REDIRECT TO LOGIN
+
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect(`/login`); //redirects back to the same view
+  res.redirect(`/login`);
 });
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//SERVER LISTENING  WHEN RUN
+//SERVER LISTENING  WHEN FILE RUN
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
