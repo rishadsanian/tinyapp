@@ -211,7 +211,7 @@ app.get("/urls/:id", (req, res) => {
 // ----------------------------------------------------------------------------
 
 //updates long url for an existing short url via the urlshow page's edit section
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   //validate
 
   const userId = req.session.userID;

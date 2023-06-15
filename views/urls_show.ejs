@@ -24,7 +24,7 @@
         <div class="card-footer text-muted">
           <h5 class="card-title">Edit</h4>
           
-          <form style ="display: flex; justify-content: center; align-items: center;"class="form-inline"  action="/urls/<%= id %>" method="POST">
+          <form style ="display: flex; justify-content: center; align-items: center;"class="form-inline"  action="/urls/<%= id %>?_method=PUT" method="POST">
             <div class="form-group mb-2">
               <label for="updateLongURL">New URL:</label>
               <input
