@@ -84,8 +84,8 @@ const findUserByEmail = (email) => {
     if (users[user].email === email) {
       return users[user];
     }
-    return null;
   }
+  return null;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -179,7 +179,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email and password are required.");
   }
 
-  //Check for duplicate registration
+  //Check for duplicate registration //todo - doesn't work with new registrations
   if (findUserByEmail(req.body.email) !== null) {
     return res.status(400).send("Email already exists.");
   }
@@ -224,7 +224,7 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid email or password");
   }
 
-  //sets cookie when user logs in and redirects to /urls
+  //sets cookie when user logs in and redirects to /urls //doesn't log in with new users but only with existing
   res.cookie("user_id", userId);
   res.redirect(`/urls`); //redirects back to the same view
 });
