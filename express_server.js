@@ -51,7 +51,9 @@ app.use(
 );
 
 //nodemon - used to restart server on changes automatically
-app.use(morgan("dev")); //Morgan status code checks
+
+//Morgan status code checks
+app.use(morgan("dev"));
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -234,7 +236,7 @@ app.get("/u/:id", (req, res) => {
   //Redirect
   const longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
-  return; //review take off
+  return;
 });
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -286,7 +288,6 @@ app.post("/register", (req, res) => {
 
   //Set cookies and redirect to /urls
   req.session.userID = userId;
-  console.log("User Database", users);
   res.redirect(`/urls`);
 });
 
