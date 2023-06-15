@@ -13,6 +13,7 @@ A four-day project involving the development of a multi-page, server-side render
 This project has been completed by [Rishad Alam](https://github.com/rishadsanian) for the [Lighthouse Labs](https://www.lighthouselabs.ca/) Web Development Bootcamp.
 <br>
 <br>
+
 ## Table of Contents
 
 
@@ -27,9 +28,8 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
   - [Functions Testing](#functions-testing)
   - [Styling](#styling)
 - [Future Features](#future-features)
-
-
-
+<br>
+<br>
 
 ## Features
 - Permits the user to create, read, update, and delete short-urls and their corresponding long-urls
