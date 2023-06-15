@@ -69,7 +69,7 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 <br>
 
 ### Node 
-- To get started install all dependencies and start the server
+- To get started, install all dependencies and start the server
 ```console
  npm install
  ```
