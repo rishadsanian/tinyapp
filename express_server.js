@@ -1,20 +1,36 @@
-///////////////////////////TINYAPP SERVER FILE/////////////////////////////////
+///////////////////////////TINYAPP SERVER /////////////////////////////////////
 
 //////////////////////////////todo wishlist////////////////////////////////////
 /*
 error message html view withheader message and back button/link
--function to generate error messages based on status code
-all post security - stop making new users if not authorized
-long url duplicate per user
-copy shorturl from urlshow
+error view page with dynamic messaging based on error code/handler
+long url duplicate warning for user
+copy shorturl from urlshow/urls index page
 */
 //////////////////////////////////////////////////////////////////////////////
 
 //Modules, Packages and files required
 const express = require("express");
 const cookieSession = require("cookie-session");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcryptjs"); //question
 const morgan = require("morgan");
+
+//Helper Functions for App
+const {
+  findUserByEmail,
+  urlsForUser,
+  generateRandomString,
+  addHttpToURL,
+} = require("./helpers");
+
+//Helper Functions for Error Handling
+const {
+  handleUnauthenticatedUser,
+  handleUnauthorizedAccess,
+  handleInvalidUrl,
+  handleInvalidCredentials,
+} = require("./helpers");
+
 ////////////////////////////////////////////////////////////////////////////////
 
 //Server
@@ -24,30 +40,27 @@ const PORT = 8080; // default port 8080
 ////////////////////////////////////////////////////////////////////////////////
 
 //Middleware setup
+
 app.set("view engine", "ejs"); //ejs setup as view engine
 app.use(express.urlencoded({ extended: true })); //built in express encoding used for reading/parsing post body
 
-//nodemon - used to restart server on changes automatically
-
-// Security SALT
+// Security SALT for bcrypt and cookie session management
 const salt = bcrypt.genSaltSync(10);
 app.use(
   cookieSession({
     name: "session",
     keys: [salt, salt, salt],
-
     // Cookie Options
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   })
 );
 
-app.use(morgan("dev"));
+//nodemon - used to restart server on changes automatically
+app.use(morgan("dev")); //Morgan status code checks
 
 ///////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////OBJECTS and VARIABLES/////////////////////////////////
-
-//USER DATABASE
 
 //APP DATABASE
 const urlDatabase = {
@@ -73,104 +86,7 @@ app.get("/urls.json", (req, res) => {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////HELPER FUNCTIONS///////////////////////////////////
-
-//generates a random short url string  - used for generating short url and userid
-const generateRandomString = (database) => {
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let randomString = "";
-  for (let i = 0; i < 6; i++) {
-    randomString += characters[Math.floor(Math.random() * characters.length)];
-  }
-
-  //EDGECASE if random string already exists in database
-  if (database[randomString]) {
-    generateRandomString(database);
-  }
-
-  return randomString;
-};
-
-//------------------------------------------------------------------------------
-
-//function to handle edgecases for ONLY when http:// is not added / checks for http and https in long urls
-
-const addHttpToURL = (url) => {
-  if (!url.startsWith("http://") && !url.startsWith("https://")) {
-    url = "http://" + url;
-  }
-  return url;
-};
-
-//------------------------------------------------------------------------------
-
-//function checks if an email exists in the user database and returns the full user object or null
-
-const findUserByEmail = (email, database) => {
-  for (const user in database) {
-    if (users[user].email === email) {
-      return users[user];
-    }
-  }
-  return null;
-};
-
-//------------------------------------------------------------------------------
-
-// function returns the URLs where the userID is equal to the id of the currently logged-in user.
-
-const urlsForUser = (id) => {
-  let output = {};
-  for (const shortUrl in urlDatabase) {
-    if (urlDatabase[shortUrl].userId === id) {
-      output[shortUrl] = urlDatabase[shortUrl].longURL;
-    }
-  }
-  return output;
-};
-
-//------------------------------------------------------------------------------
-
-//functions to handle 400s status codes
-
-const handleUnauthenticatedUser = (req, res) => {
-  return res
-    .status(403)
-    .send(
-      `<html> <p style="font-size: larger"> Error 403: Unauthenticated User. You need to log in or create an account to view this page.</p> </html> \n`
-    );
-};
-
-const handleInvalidCredentials = (req, res) => {
-  return res
-    .status(401)
-    .send(
-      `<html><p style="font-size: larger">Error 401: Unable to Authenticate. Invalid email or password</p></html>`
-    );
-};
-
-const handleInvalidUrl = (req, res) => {
-  return res
-    .status(404)
-    .send(
-      `<html> <p style="font-size: larger"> Error 404: URL not found.</p> </html> \n`
-    );
-};
-
-const handleUnauthorizedAccess = (req, res) => {
-  if (!Object.keys(urlsForUser(req.session.userID)).includes(req.params.id)) {
-    return res
-      .status(403)
-      .send(
-        `<html> <p style="font-size: larger"> Error 403: Unauthorized user.</p> </html> \n`
-      );
-  }
-};
-
-///////////////////////////////////////////////////////////////////////////////
-
-//////// ./ HOMEPAGE REDIRECTS TO URLS IF LOGGED IN OR LOGIN PAGE IF NOT////////
+/////// ./ HOMEPAGE REDIRECTS TO URLS IF LOGGED IN OR LOGIN PAGE IF NOT////////
 
 app.get("/", (req, res) => {
   !req.session.userID ? res.redirect(`/login`) : res.redirect(`/urls`);
@@ -186,7 +102,7 @@ app.get("/urls", (req, res) => {
   if (!req.session.userID) return handleUnauthenticatedUser(req, res);
 
   const templateVars = {
-    urls: urlsForUser(req.session.userID), //
+    urls: urlsForUser(req.session.userID, urlDatabase), //
     user: users[req.session.userID],
   };
 
@@ -198,7 +114,11 @@ app.post("/urls/:id/delete", (req, res) => {
   //validate
   if (!req.session.userID) return handleUnauthenticatedUser(req, res);
   if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
-  if (!Object.keys(urlsForUser(req.session.userID)).includes(req.params.id))
+  if (
+    !Object.keys(urlsForUser(req.session.userID, urlDatabase)).includes(
+      req.params.id
+    )
+  )
     return handleUnauthorizedAccess(req, res);
 
   delete urlDatabase[req.params.id];
@@ -241,7 +161,11 @@ app.get("/urls/:id", (req, res) => {
   //Validate
   if (!req.session.userID) return handleUnauthenticatedUser(req, res);
   if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
-  if (!Object.keys(urlsForUser(req.session.userID)).includes(req.params.id))
+  if (
+    !Object.keys(urlsForUser(req.session.userID, urlDatabase)).includes(
+      req.params.id
+    )
+  )
     return handleUnauthorizedAccess(req, res);
 
   const templateVars = {
@@ -258,7 +182,11 @@ app.post("/urls/:id", (req, res) => {
   //validate
   if (!req.session.userID) return handleUnauthenticatedUser(req, res);
   if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
-  if (!Object.keys(urlsForUser(req.session.userID)).includes(req.params.id))
+  if (
+    !Object.keys(urlsForUser(req.session.userID, urlDatabase)).includes(
+      req.params.id
+    )
+  )
     return handleUnauthorizedAccess(req, res);
 
   urlDatabase[req.params.id].longURL = addHttpToURL(req.body.longURL);
@@ -345,7 +273,7 @@ app.post("/login", (req, res) => {
     return handleInvalidCredentials(req, res);
 
   //Lookup valid userid by email
-  const userId = findUserByEmail(req.body.email, users).id;
+  const userId = findUserByEmail(req.body.email, users);
 
   //Check Password
   if (!bcrypt.compareSync(req.body.password, users[userId].password))
