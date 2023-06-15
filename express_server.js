@@ -1,12 +1,8 @@
-///////////////////////////TINYAPP SERVER /////////////////////////////////////
-
-//////////////////////////////todo wishlist////////////////////////////////////
-/*
-error view page with dynamic messaging based on error code/handler
-long url duplicate entry warning for user
-copy shorturl button from urlshow/urls index page
-*/
+///////////////////////////////////////////////////////////////////////////////
+////                               TINYAPP                                 ////
 //////////////////////////////////////////////////////////////////////////////
+
+//----------------------------------------------------------------------------//
 
 //Modules, Packages and files required
 const express = require("express");
