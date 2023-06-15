@@ -85,21 +85,31 @@ app.get("/urls.json", (req, res) => {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-/////// ./ HOMEPAGE REDIRECTS TO URLS IF LOGGED IN OR LOGIN PAGE IF NOT////////
+//------------------------------------------------------------------------------
+/////////////////////////////////////////////////////////////////// ./ HOMEPAGE
+//------------------------------------------------------------------------------
+
+//Redirects based on login status
 
 app.get("/", (req, res) => {
   !req.session.userID ? res.redirect(`/login`) : res.redirect(`/urls`);
 });
 
+//------------------------------------------------------------------------------
 //////////////////////// URL DATA ENDPOINTS GET/POST  //////////////////////////
+//------------------------------------------------------------------------------
 
-// ./urls (urls_index.ejs)  - SHOW ALL URLS WITH BUTTONS TO EDIT OR DELETE
+//////// ./urls (urls_index.ejs)  - SHOW ALL URLS WITH BUTTONS TO EDIT OR DELETE
+//------------------------------------------------------------------------------
 
 //route to urls ejs flie and return render based on the template vars
 app.get("/urls", (req, res) => {
   //validate
+
+  //Check if user is logged in
   if (!req.session.userID) return handleUnauthenticatedUser(req, res);
 
+  //Routes to appropriate view
   const templateVars = {
     urls: urlsForUser(req.session.userID, urlDatabase), //
     user: users[req.session.userID],
@@ -108,11 +118,18 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//------------------------------------------------------------------------------
+
 //deletes an entry from urls_index page and urlDatabase
+
 app.post("/urls/:id/delete", (req, res) => {
   //validate
+
+  //Check if user is logged in.
   if (!req.session.userID) return handleUnauthenticatedUser(req, res);
+  //Checks if url exists in database.
   if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
+  //Checks if user owns the url.
   if (
     !Object.keys(urlsForUser(req.session.userID, urlDatabase)).includes(
       req.params.id
@@ -120,40 +137,49 @@ app.post("/urls/:id/delete", (req, res) => {
   )
     return handleUnauthorizedAccess(req, res);
 
-  delete urlDatabase[req.params.id];
+  //Deletes the entry
+  delete urlDatabase[req.params.id]; //could be made in to a function
   res.redirect("/urls");
 });
 
 //------------------------------------------------------------------------------
 
-// ./urls/new (urls_new.ejs) CREATE NEW URLS WITH FORM TO SUBMIT
+////////////////// ./urls/new (urls_new.ejs) CREATE NEW URLS WITH FORM TO SUBMIT
+//------------------------------------------------------------------------------
 
 //routes to urlsnew view
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: users[req.session.userID] };
 
+  //check if user is logged in and route to appropriate view
   !templateVars.user
     ? res.redirect(`/login`)
     : res.render(`urls_new`, templateVars);
 });
-app.post("/urls", (req, res) => {
-  // creates a new entry from the urls_new page.
 
+//------------------------------------------------------------------------------
+
+// creates a new entry from the urls_new page.
+app.post("/urls", (req, res) => {
+  // Check if user is logged in
   if (!req.session.userID) return handleUnauthenticatedUser(req, res);
 
+  //Generates short url and save urls to database.
   if (req.session.userID) {
     const randomString = generateRandomString(urlDatabase);
     urlDatabase[randomString] = {
       longURL: addHttpToURL(req.body.longURL),
       userId: req.session.userID,
-    }; //adds http
+    };
+
+    //Route to appropriate view
     res.redirect(`/urls/${randomString}`);
-  } //redirects back to the urls/:id view
+  }
 });
 
 // ----------------------------------------------------------------------------
-
-// ./urls/:id (urls_show.ejs) SHOWS LONG URL LINKS TO FOLLOW AND EDIT OPTION FOR UPDATE
+///////// ./urls/:id (urls_show.ejs) SHOWS LONG URL LINKS TO FOLLOW AND EDIT OPTION FOR UPDATE
+// ----------------------------------------------------------------------------
 
 //route to urls show ejs flie and return render based on the template vars
 app.get("/urls/:id", (req, res) => {
@@ -167,6 +193,7 @@ app.get("/urls/:id", (req, res) => {
   )
     return handleUnauthorizedAccess(req, res);
 
+  //Send to appropriate render view
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
@@ -175,12 +202,17 @@ app.get("/urls/:id", (req, res) => {
 
   res.render("urls_show", templateVars);
 });
+// ----------------------------------------------------------------------------
 
 //updates long url for an existing short url via the urlshow page's edit section
 app.post("/urls/:id", (req, res) => {
   //validate
+
+  //Check if user is logged in
   if (!req.session.userID) return handleUnauthenticatedUser(req, res);
+  //Check if url requested exists
   if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
+  //Check if url requested belongs to the user
   if (
     !Object.keys(urlsForUser(req.session.userID, urlDatabase)).includes(
       req.params.id
@@ -188,28 +220,35 @@ app.post("/urls/:id", (req, res) => {
   )
     return handleUnauthorizedAccess(req, res);
 
+  //Update long url
   urlDatabase[req.params.id].longURL = addHttpToURL(req.body.longURL);
   res.redirect(`/urls/${req.params.id}`); //redirects back to the same view
 });
 
 // ----------------------------------------------------------------------------
-
-// /u/:id REDIRECTS TO LONG URL FROM SHORT URL
+////////////////////////////////// /u/:id REDIRECTS TO LONG URL FROM SHORT URL
+// ----------------------------------------------------------------------------
 
 app.get("/u/:id", (req, res) => {
   //validate
+
+  //check if the url exists in the database
   if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
 
+  //Redirect
   const longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
-  return;
+  return; //review take off
 });
 
 ////////////////////////////////////////////////////////////////////////////////
 
-///////////////// USER DATA ENDPOINTS GET/POST //////////////////////
+// ----------------------------------------------------------------------------
+///////////////// USER DATA ENDPOINTS GET/POST ////////////////////////////////
+// ----------------------------------------------------------------------------
 
-// ./register (user_register.ejs)  USER REGISTRATION PAGE WITH USER EMAIL AND PASSWORD FORM
+//////////////////// ./register (user_register.ejs)  USER REGISTRATION PAGE    WITH USER EMAIL AND PASSWORD FORM
+// ----------------------------------------------------------------------------
 
 app.get("/register", (req, res) => {
   const templateVars = { user: users[req.session.userID] };
@@ -218,6 +257,8 @@ app.get("/register", (req, res) => {
     ? res.render(`user_register`, templateVars)
     : res.redirect(`/urls`);
 });
+
+// ----------------------------------------------------------------------------
 
 //saves user settings in users object
 app.post("/register", (req, res) => {
@@ -233,13 +274,14 @@ app.post("/register", (req, res) => {
     return res.status(409).send("User already exists.");
   }
 
-  //create new user
+  //create new userId
   const userId = "user" + generateRandomString(users);
 
   //password security
-  const password = req.body.password; // found in the req.body object
+  const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, salt);
 
+  //Save user to user database
   users[userId] = {
     id: userId,
     email: req.body.email,
@@ -253,16 +295,20 @@ app.post("/register", (req, res) => {
 });
 
 // ----------------------------------------------------------------------------
-
 // ./login (user_login.ejs) - ALLOWS USERS TO CREATE A NEW ACCOUNT WITH AN EMAIL AND PASSWORD FORM
+// ----------------------------------------------------------------------------
 
+//Login page view setup
 app.get("/login", (req, res) => {
   const templateVars = { user: users[req.session.userID] };
 
+  //Check if user already logged in
   !templateVars.user
     ? res.render(`user_login`, templateVars)
     : res.redirect(`/urls`);
 });
+
+// ----------------------------------------------------------------------------
 
 app.post("/login", (req, res) => {
   //Validate
@@ -285,22 +331,21 @@ app.post("/login", (req, res) => {
 
 // ----------------------------------------------------------------------------
 
-// /logout DELETES COOKIES WHEN LOGOUT AND REDIRECT TO LOGIN
+//////////////////// /logout DELETES COOKIES WHEN LOGOUT AND REDIRECT TO LOGIN
+// ----------------------------------------------------------------------------
 
+//Remove cookie and redirect to login.
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect(`/login`);
 });
 
 ///////////////////////////////////////////////////////////////////////////////
-
-//SERVER LISTENING  WHEN FILE RUN
+////////////////////ERVER LISTENING  WHEN FILE RUN//////////////////////////////
+// ----------------------------------------------------------------------------
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
 });
-
-console.log(users);
-console.log(urlDatabase);
 
 ////////////////////////////////////////////////////////////////////////////////
