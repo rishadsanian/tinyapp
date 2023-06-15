@@ -2,7 +2,8 @@
 
 //////////////////////////////todo wishlist////////////////////////////////////
 /*
-error message html view wit header message and back button/link
+error message html view withheader message and back button/link
+-function to generate error messages based on status code
 all post security - stop making new users if not authorized
 long url duplicate per user
 copy shorturl from urlshow
@@ -37,8 +38,8 @@ app.use(cookieParser()); //cookieParser set to use as encoding for cookies
 //APP DATABASE
 const urlDatabase = {
   //database for urls
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b2xVn2: { longURL: "http://www.lighthouselabs.ca", userId: "admin1" },
+  "9sm5xK": { longURL: "http://www.google.com", userId: "admin1" },
 };
 
 //USER DATABASE
@@ -99,27 +100,91 @@ const findUserByEmail = (email) => {
 
 //------------------------------------------------------------------------------
 
-///////////////////////////////////////////////////////////////////////////////
+// function returns the URLs where the userID is equal to the id of the currently logged-in user.
 
-///////////////// URL DATA ENDPOINTS GET/POST  //////////////////////
-
-// home page
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
+const urlsForUser = (id) => {
+  let output = {};
+  for (const shortUrl in urlDatabase) {
+    if (urlDatabase[shortUrl].userId === id) {
+      output[shortUrl] = urlDatabase[shortUrl].longURL;
+    }
+  }
+  return output;
+};
 
 //------------------------------------------------------------------------------
+
+//functions to handle 400s status codes
+
+//users
+
+const handleUnauthenticatedUser = (req, res) => {
+  return res
+    .status(403)
+    .send(
+      `<html> <p style="font-size: larger"> Error 403: Unauthenticated User. You need to log in or create an account to view this page.</p> </html> \n`
+    );
+};
+
+const handleInvalidCredentials = (req, res) => {
+  return res
+    .status(401)
+    .send(
+      `<html><p style="font-size: larger">Error 401: Unable to Authenticate. Invalid email or password</p></html>`
+    );
+};
+
+const handleInvalidUrl = (req, res) => {
+  return res
+    .status(404)
+    .send(
+      `<html> <p style="font-size: larger"> Error 404: URL not found.</p> </html> \n`
+    );
+};
+
+const handleUnauthorizedAccess = (req, res) => {
+  if (!Object.keys(urlsForUser(req.cookies.user_id)).includes(req.params.id)) {
+    return res
+      .status(403)
+      .send(
+        `<html> <p style="font-size: larger"> Error 403: Unauthorized user.</p> </html> \n`
+      );
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+//////// ./ HOMEPAGE REDIRECTS TO URLS IF LOGGED IN OR LOGIN PAGE IF NOT////////
+
+app.get("/", (req, res) => {
+  !req.cookies.user_id ? res.redirect(`/login`) : res.redirect(`/urls`);
+});
+
+//////////////////////// URL DATA ENDPOINTS GET/POST  //////////////////////////
 
 // ./urls (urls_index.ejs)  - SHOW ALL URLS WITH BUTTONS TO EDIT OR DELETE
 
 //route to urls ejs flie and return render based on the template vars
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: users[req.cookies.user_id] };
+  //validate
+  if (!req.cookies.user_id) return handleUnauthenticatedUser(req, res);
+
+  const templateVars = {
+    urls: urlsForUser(req.cookies.user_id), //
+    user: users[req.cookies.user_id],
+  };
+
   res.render("urls_index", templateVars);
 });
 
 //deletes an entry from urls_index page and urlDatabase
 app.post("/urls/:id/delete", (req, res) => {
+  //validate
+  if (!req.cookies.user_id) return handleUnauthenticatedUser(req, res);
+  if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
+  if (!Object.keys(urlsForUser(req.cookies.user_id)).includes(req.params.id))
+    return handleUnauthorizedAccess(req, res);
+
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
@@ -139,16 +204,14 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   // creates a new entry from the urls_new page.
 
-  if (!req.cookies.user_id) {
-    return res
-      .status(401)
-      .send(
-        `<html> <p> Error: Unauthorized user. You need to log in to view this page.</p> </html> \n`
-      );
-  }
+  if (!req.cookies.user_id) return handleUnauthenticatedUser(req, res);
+
   if (req.cookies.user_id) {
     const randomString = generateRandomString(urlDatabase);
-    urlDatabase[randomString] = addHttpToURL(req.body.longURL); //adds http
+    urlDatabase[randomString] = {
+      longURL: addHttpToURL(req.body.longURL),
+      userId: req.cookies.user_id,
+    }; //adds http
     res.redirect(`/urls/${randomString}`);
   } //redirects back to the urls/:id view
 });
@@ -159,17 +222,30 @@ app.post("/urls", (req, res) => {
 
 //route to urls show ejs flie and return render based on the template vars
 app.get("/urls/:id", (req, res) => {
+  //Validate
+  if (!req.cookies.user_id) return handleUnauthenticatedUser(req, res);
+  if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
+  if (!Object.keys(urlsForUser(req.cookies.user_id)).includes(req.params.id))
+    return handleUnauthorizedAccess(req, res);
+
   const templateVars = {
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
     user: users[req.cookies.user_id],
   };
+
   res.render("urls_show", templateVars);
 });
 
 //updates long url for an existing short url via the urlshow page's edit section
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = addHttpToURL(req.body.longURL);
+  //validate
+  if (!req.cookies.user_id) return handleUnauthenticatedUser(req, res);
+  if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
+  if (!Object.keys(urlsForUser(req.cookies.user_id)).includes(req.params.id))
+    return handleUnauthorizedAccess(req, res);
+
+  urlDatabase[req.params.id].longURL = addHttpToURL(req.body.longURL);
   res.redirect(`/urls/${req.params.id}`); //redirects back to the same view
 });
 
@@ -178,14 +254,10 @@ app.post("/urls/:id", (req, res) => {
 // /u/:id REDIRECTS TO LONG URL FROM SHORT URL
 
 app.get("/u/:id", (req, res) => {
-  if (!(req.params.id in urlDatabase)) {
-    return res
-      .status(404)
-      .send(
-        `<html> <p> Error: ${req.params.id} is not a valid short url.</p> </html> \n`
-      );
-  }
-  const longURL = urlDatabase[req.params.id];
+  //validate
+  if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
+
+  const longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
   return;
 });
@@ -210,13 +282,12 @@ app.post("/register", (req, res) => {
 
   //Check empty email or passwords
   if (!req.body.email || !req.body.password) {
-    console.log("Incomplete Form");
     return res.status(400).send("Email and password are required.");
   }
 
   //Check for duplicate emails for reg
   if (findUserByEmail(req.body.email) !== null) {
-    return res.status(400).send("Email already exists.");
+    return res.status(409).send("User already exists.");
   }
 
   //create new user
@@ -250,19 +321,17 @@ app.post("/login", (req, res) => {
   //Validate
 
   //Check Email
-  if (!findUserByEmail(req.body.email)) {
-    return res.status(403).send("Invalid email or password");
-  }
+  if (!findUserByEmail(req.body.email))
+    return handleInvalidCredentials(req, res);
 
-  //valid userid lookup by email
+  //Lookup valid userid by email
   const userId = findUserByEmail(req.body.email).id;
 
   //Check Password
-  if (users[userId].password !== req.body.password) {
-    return res.status(403).send("Invalid email or password");
-  }
+  if (users[userId].password !== req.body.password)
+    return handleInvalidCredentials(req, res);
 
-  //sets cookie when user logs in and redirects to /urls
+  //Set cookie when user logs in and redirects to /urls
   res.cookie("user_id", userId);
   res.redirect(`/urls`);
 });
@@ -284,4 +353,6 @@ app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}!`);
 });
 console.log(users);
+console.log(urlDatabase);
+
 ////////////////////////////////////////////////////////////////////////////////
