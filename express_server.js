@@ -9,6 +9,7 @@ const express = require("express");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs"); //question
 const morgan = require("morgan");
+const methodOverride = require("method-override");
 
 //Helper Functions for App
 const {
@@ -54,6 +55,8 @@ app.use(
 
 //Morgan status code checks
 app.use(morgan("dev"));
+
+app.use(methodOverride("_method")); //methodoverride for put and delete
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -120,23 +123,23 @@ app.get("/urls", (req, res) => {
 
 //deletes an entry from urls_index page and urlDatabase
 
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id", (req, res) => {
   //validate
+  const userId = req.session.userID;
+  const shortUrl = req.params.id;
 
   //Check if user is logged in.
-  if (!req.session.userID) return handleUnauthenticatedUser(req, res);
+  if (!userId) return handleUnauthenticatedUser(req, res);
+
   //Checks if url exists in database.
-  if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
+  if (!(shortUrl in urlDatabase)) return handleInvalidUrl(req, res);
+
   //Checks if user owns the url.
-  if (
-    !Object.keys(urlsForUser(req.session.userID, urlDatabase)).includes(
-      req.params.id
-    )
-  )
-    return handleUnauthorizedAccess(req, res);
+  const urlObj = urlDatabase[shortUrl];
+  if (urlObj.userId !== userId) return handleUnauthorizedAccess(req, res);
 
   //Deletes the entry
-  delete urlDatabase[req.params.id]; //could be made in to a function
+  delete urlDatabase[shortUrl]; //could be made in to a function
   res.redirect("/urls");
 });
 
@@ -182,19 +185,24 @@ app.post("/urls", (req, res) => {
 //route to urls show ejs flie and return render based on the template vars
 app.get("/urls/:id", (req, res) => {
   //Validate
-  if (!req.session.userID) return handleUnauthenticatedUser(req, res);
-  if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
-  if (
-    !Object.keys(urlsForUser(req.session.userID, urlDatabase)).includes(
-      req.params.id
-    )
-  )
-    return handleUnauthorizedAccess(req, res);
+
+  const userId = req.session.userID;
+  const shortUrl = req.params.id;
+
+  //Check if user is logged in.
+  if (!userId) return handleUnauthenticatedUser(req, res);
+
+  //Checks if url exists in database.
+  if (!(shortUrl in urlDatabase)) return handleInvalidUrl(req, res);
+
+  //Checks if user owns the url.
+  const urlObj = urlDatabase[shortUrl];
+  if (urlObj.userId !== userId) return handleUnauthorizedAccess(req, res);
 
   //Send to appropriate render view
   const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id].longURL,
+    id: shortUrl,
+    longURL: urlDatabase[shortUrl].longURL,
     user: users[req.session.userID],
   };
 
@@ -206,17 +214,18 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   //validate
 
-  //Check if user is logged in
-  if (!req.session.userID) return handleUnauthenticatedUser(req, res);
-  //Check if url requested exists
-  if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
-  //Check if url requested belongs to the user
-  if (
-    !Object.keys(urlsForUser(req.session.userID, urlDatabase)).includes(
-      req.params.id
-    )
-  )
-    return handleUnauthorizedAccess(req, res);
+  const userId = req.session.userID;
+  const shortUrl = req.params.id;
+
+  //Check if user is logged in.
+  if (!userId) return handleUnauthenticatedUser(req, res);
+
+  //Checks if url exists in database.
+  if (!(shortUrl in urlDatabase)) return handleInvalidUrl(req, res);
+
+  //Checks if user owns the url.
+  const urlObj = urlDatabase[shortUrl];
+  if (urlObj.userId !== userId) return handleUnauthorizedAccess(req, res);
 
   //Update long url
   urlDatabase[req.params.id].longURL = addHttpToURL(req.body.longURL);
@@ -338,7 +347,7 @@ app.post("/logout", (req, res) => {
 });
 
 ///////////////////////////////////////////////////////////////////////////////
-////////////////////ERVER LISTENING  WHEN FILE RUN//////////////////////////////
+////////////////////SERVER LISTENING  WHEN FILE RUN/////////////////////////////
 // ----------------------------------------------------------------------------
 
 app.listen(PORT, () => {
