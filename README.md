@@ -1,7 +1,7 @@
 
 <br>
 
-![Alt text](example-img/tiny-image.png)
+![TinyApp](docs/tiny-image.png)
 
 # 
 <br>
