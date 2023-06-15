@@ -1,6 +1,6 @@
 ////////////////////////////HELPER FUNCTIONS///////////////////////////////////
 
-//function checks if an email exists in the user database and returns the full user object or null
+//function checks if an email exists in the user database and returns the full user id or null
 
 const findUserByEmail = (email, database) => {
   for (const user in database) {
