@@ -23,35 +23,28 @@
         id="signedOut"
         style="display: flex; flex-direction: row-reverse; align-items: center"
       >
+        <style>
+          #nav-btn {
+            border-color: darkslategray;
+            color: darkslategray;
+            width: 5em;
+            margin: 0.5em;
+          }
+
+          #nav-btn:hover {
+            background-color: darkslategray;
+            color: white;
+          }
+        </style>
         <% if(!user) {%>
         <form id="registerbtn" action="/register">
-          <button
-            id="reg-btn"
-            type="submit"
-            class="btn btn-register"
-            style="
-              border-color: darkslategray;
-              color: darkslategray;
-              width: 5em;
-              margin: 0.5 em;
-            "
-          >
+          <button id="nav-btn" type="submit" class="btn btn-register">
             Register
           </button>
         </form>
 
         <form id="login-btn" action="/login">
-          <button
-            id="login"
-            type="submit"
-            class="btn btn-login"
-            style="
-              border-color: darkslategray;
-              color: darkslategray;
-              width: 5em;
-              margin: 0.5em;
-            "
-          >
+          <button id="nav-btn" type="submit" class="btn btn-login">
             Login
           </button>
         </form>
@@ -78,16 +71,7 @@
             action="/logout"
             method="POST"
           >
-            <button
-              type="submit"
-              class="btn btn-login"
-              style="
-                border-color: darkslategray;
-                color: darkslategray;
-                width: 5em;
-                margin-top: 0.5em;
-              "
-            >
+            <button id="nav-btn" type="submit" class="btn btn-login">
               Logout
             </button>
           </form>
