@@ -1,7 +1,8 @@
 
 <br>
 
-![TinyApp](docs/tiny-image.png)
+![TinyApp](https://github.com/rishadsanian/tinyapp/assets/77033627/f326b8b0-6657-46bd-9d85-dc1b25469624)
+
 
 # 
 <br>
@@ -44,19 +45,22 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 <br>
 <br>
 
-![Login](docs/image-login.png)
+!["Screenshot of Login page](https://github.com/rishadsanian/tinyapp/blob/master/docs/image-login.png?raw=true)
 <br>
 
-![URLs](docs/image-urls.png)
+!["Screenshot of URLs page](https://github.com/rishadsanian/tinyapp/blob/master/docs/image-urls.png?raw=true)
 <br>
 
-![Edit](docs/image-edit.png)
+!["Screenshot of Edit page"](https://github.com/rishadsanian/tinyapp/assets/77033627/b2bcdafa-9004-4a3b-b510-7048549afcde)
+
 <br>
 
-![Add New](docs/image-new.png)
+!["Screenshot of New page"](https://github.com/rishadsanian/tinyapp/assets/77033627/8450a3ea-8bf0-43c2-b1d0-34d54257114c)
+
 <br>
 
-![Register](docs/image-register.png)
+!["Screenshot of Register page"](https://github.com/rishadsanian/tinyapp/blob/master/docs/image-register.png?raw=true)
+
 <br>
 <br>
 
