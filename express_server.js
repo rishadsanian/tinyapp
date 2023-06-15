@@ -216,7 +216,7 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid email or password");
   }
 
-  //valid userid
+  //valid userid lookup by email
   const userId = findUserByEmail(req.body.email).id;
 
   //Check Password
