@@ -17,6 +17,7 @@ const {
   urlsForUser,
   generateRandomString,
   addHttpToURL,
+  // countUniqueVisitors,
 } = require("./helpers");
 
 //Helper Functions for Error Handling
@@ -65,9 +66,28 @@ app.use(methodOverride("_method")); //methodoverride for put and delete
 //APP DATABASE
 const urlDatabase = {
   //database for urls
-  b2xVn2: { longURL: "http://www.lighthouselabs.ca", userId: "admin1" },
-  "9sm5xK": { longURL: "http://www.google.com", userId: "admin1" },
+  b2xVn2: {
+    longURL: "http://www.lighthouselabs.ca",
+    userId: "admin1",
+    tracking: [],
+    // countVisits: !this.tracking ? 0 : this.tracking.length,
+    // countUniqueVisitors: () => {
+    //   return countUniqueVisitors(this.tracking);
+    // },
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userId: "admin1",
+    tracking: [],
+    // countVisits: !this.tracking ? 0 : this.tracking.length,
+    // countUniqueVisitors: () => {
+    //   return countUniqueVisitors(this.tracking);
+    // },
+  },
 };
+
+//VISITORS DATABASE
+const visitors = {};
 
 //USER DATABASE
 const users = {
@@ -171,6 +191,12 @@ app.post("/urls", (req, res) => {
     urlDatabase[randomString] = {
       longURL: addHttpToURL(req.body.longURL),
       userId: req.session.userID,
+      tracking: [],
+      // countVisits: !this.tracking ? 0 : this.tracking.length,
+
+      // countUniqueVisitors: () => {
+      //   return countUniqueVisitors(this.tracking);
+      // },
     };
 
     //Route to appropriate view
@@ -199,11 +225,27 @@ app.get("/urls/:id", (req, res) => {
   const urlObj = urlDatabase[shortUrl];
   if (urlObj.userId !== userId) return handleUnauthorizedAccess(req, res);
 
+  const countUniqueVisitors = (tracking) => {
+    const visitorIds = [];
+    tracking.forEach((visit) => {
+      if (!visitorIds.includes(visit.visitorId)) {
+        visitorIds.push(visit.visitorId);
+      }
+    });
+    return visitorIds.length;
+  };
+
+  //Compute analytics
+  const countVisits = urlObj.tracking.length;
+  const countUnique = countUniqueVisitors(urlObj.tracking);
+
   //Send to appropriate render view
   const templateVars = {
     id: shortUrl,
     longURL: urlDatabase[shortUrl].longURL,
     user: users[req.session.userID],
+    countVisits: countVisits,
+    countUnique: countUnique,
   };
 
   res.render("urls_show", templateVars);
@@ -238,12 +280,39 @@ app.put("/urls/:id", (req, res) => {
 
 app.get("/u/:id", (req, res) => {
   //validate
+  const userId = req.session.userID;
+  const shortUrl = req.params.id;
+  const urlObj = urlDatabase[shortUrl];
+  const longURL = urlObj.longURL;
 
   //check if the url exists in the database
-  if (!(req.params.id in urlDatabase)) return handleInvalidUrl(req, res);
+  if (!(shortUrl in urlDatabase)) return handleInvalidUrl(req, res);
 
-  //Redirect
-  const longURL = urlDatabase[req.params.id].longURL;
+  //check if there is an existing visitor id cookie
+  if (!req.session.visitorId) {
+    //generate and set cookie
+    req.session.visitorId = "visitor" + generateRandomString(visitors);
+    //Enter new entry in visitor Database
+    visitors[req.session.visitorId] = [];
+  }
+
+  const visitorId = req.session.visitorId;
+
+  //If visitor is not the owner of short url
+  if (urlObj.userId !== userId) {
+    //register visitor activity in visitor Database
+    visitors[visitorId].push({
+      timestamp: new Date(),
+      shortUrl: shortUrl,
+    });
+
+    //Add tracking information to URL Database
+    urlObj.tracking.push({ visitorId: visitorId, timestamp: new Date() });
+  }
+
+  console.log(urlDatabase);
+
+  //Redirect to long URL
   res.redirect(longURL);
   return;
 });
@@ -355,3 +424,5 @@ app.listen(PORT, () => {
 });
 
 ////////////////////////////////////////////////////////////////////////////////
+console.log(urlDatabase);
+console.log(users);
