@@ -17,7 +17,7 @@ const {
   urlsForUser,
   generateRandomString,
   addHttpToURL,
-  // countUniqueVisitors,
+  countUniqueVisitors,
 } = require("./helpers");
 
 //Helper Functions for Error Handling
@@ -224,16 +224,6 @@ app.get("/urls/:id", (req, res) => {
   //Checks if user owns the url.
   const urlObj = urlDatabase[shortUrl];
   if (urlObj.userId !== userId) return handleUnauthorizedAccess(req, res);
-
-  const countUniqueVisitors = (tracking) => {
-    const visitorIds = [];
-    tracking.forEach((visit) => {
-      if (!visitorIds.includes(visit.visitorId)) {
-        visitorIds.push(visit.visitorId);
-      }
-    });
-    return visitorIds.length;
-  };
 
   //Compute analytics
   const countVisits = urlObj.tracking.length;

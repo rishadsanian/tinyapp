@@ -56,6 +56,18 @@ const generateRandomString = (database) => {
 
 //-----------------------------------------------------------------------------
 
+const countUniqueVisitors = (tracking) => {
+  const visitorIds = [];
+  tracking.forEach((visit) => {
+    if (!visitorIds.includes(visit.visitorId)) {
+      visitorIds.push(visit.visitorId);
+    }
+  });
+  return visitorIds.length;
+};
+
+//-----------------------------------------------------------------------------
+
 //functions to handle 400s status codes
 
 const handleUnauthenticatedUser = (req, res) => {
@@ -100,4 +112,5 @@ module.exports = {
   handleUnauthorizedAccess,
   handleInvalidUrl,
   handleInvalidCredentials,
+  countUniqueVisitors,
 };
