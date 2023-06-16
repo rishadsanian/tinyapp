@@ -75,20 +75,16 @@ const urlDatabase = {
     userId: "admin1",
     tracking: [],
     dateCreated: new Date(),
-    // countVisits: !this.tracking ? 0 : this.tracking.length,
-    // countUniqueVisitors: () => {
-    //   return countUniqueVisitors(this.tracking);
-    // },
+    countVisits: 0,
+    countUnique: 0,
   },
   "9sm5xK": {
     longURL: "http://www.google.com",
     userId: "admin1",
     tracking: [],
     dateCreated: new Date(),
-    // countVisits: !this.tracking ? 0 : this.tracking.length,
-    // countUniqueVisitors: () => {
-    //   return countUniqueVisitors(this.tracking);
-    // },
+    countVisits: 0,
+    countUnique: 0,
   },
 };
 
@@ -136,10 +132,14 @@ app.get("/urls", (req, res) => {
   //Check if user is logged in
   if (!req.session.userID) return handleUnauthenticatedUser(req, res);
 
+  //Pull urls for user
+  const urls = urlsForUser(req.session.userID, urlDatabase);
+
   //Routes to appropriate view
   const templateVars = {
-    urls: urlsForUser(req.session.userID, urlDatabase), //
+    urls,
     user: users[req.session.userID],
+    urlDatabase,
   };
 
   res.render("urls_index", templateVars);
@@ -199,11 +199,8 @@ app.post("/urls", (req, res) => {
       userId: req.session.userID,
       tracking: [],
       dateCreated: new Date(),
-      // countVisits: !this.tracking ? 0 : this.tracking.length,
-
-      // countUniqueVisitors: () => {
-      //   return countUniqueVisitors(this.tracking);
-      // },
+      countVisits: 0,
+      countUnique: 0,
     };
 
     //Route to appropriate view
@@ -233,10 +230,10 @@ app.get("/urls/:id", (req, res) => {
   if (urlObj.userId !== userId) return handleUnauthorizedAccess(req, res);
 
   //Compute analytics
-  const countVisits = urlObj.tracking.length;
-  const countUnique = countUniqueVisitors(urlObj.tracking);
+  const countVisits = urlObj.countVisits;
+  const countUnique = urlObj.countUnique;
   const dateCreated = formatDate(urlObj.dateCreated);
-  const daysActive = activeDays(urlObj.dateCreated);
+  const daysActive = urlObj.daysActive;
   const visitHistory = urlObj.tracking; //formatTracking(urlObj.tracking);
 
   console.log(visitHistory);
@@ -315,6 +312,10 @@ app.get("/u/:id", (req, res) => {
     const printDateTime = formatDateTime(timestamp);
     urlObj.tracking.push({ visitorId: visitorId, timestamp, printDateTime });
   }
+  //Add analytics to URL database
+  urlObj.countVisits = urlObj.tracking.length;
+  urlObj.countUnique = countUniqueVisitors(urlObj.tracking);
+  urlObj.daysActive = activeDays(urlObj.dateCreated);
 
   //Redirect to long URL
   res.redirect(longURL);
