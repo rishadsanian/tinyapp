@@ -104,12 +104,13 @@ const formatDate = (timestamp) => {
 
 const activeDays = (dateCreated) => {
   const date1 = dateCreated;
-  const date2 = new Date("2023-06-20");
+  const date2 = new Date();
 
   const timeDiff = Math.abs(date2 - date1);
 
   // return converted milliseconds to days
-  return Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+  return JSON.stringify(Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
 };
 
 //-----------------------------------------------------------------------------
@@ -174,5 +175,5 @@ module.exports = {
   formatDateTime,
   formatDate,
   activeDays,
-  formatTracking
+  formatTracking,
 };

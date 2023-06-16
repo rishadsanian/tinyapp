@@ -21,7 +21,7 @@ const {
   formatDate,
   formatDateTime,
   activeDays,
-  formatTracking,
+  //formatTracking,
 } = require("./helpers");
 
 //Helper Functions for Error Handling
@@ -236,9 +236,10 @@ app.get("/urls/:id", (req, res) => {
   const countVisits = urlObj.tracking.length;
   const countUnique = countUniqueVisitors(urlObj.tracking);
   const dateCreated = formatDate(urlObj.dateCreated);
-  const daysActive = activeDays(this.dateCreated);
-  const visitHistory = formatTracking(urlObj.tracking);
+  const daysActive = activeDays(urlObj.dateCreated);
+  const visitHistory = urlObj.tracking; //formatTracking(urlObj.tracking);
 
+  console.log(visitHistory);
   //Send to appropriate render view
   const templateVars = {
     id: shortUrl,
@@ -248,7 +249,7 @@ app.get("/urls/:id", (req, res) => {
     countUnique: countUnique,
     dateCreated,
     daysActive,
-    visitHistory
+    visitHistory,
   };
 
   res.render("urls_show", templateVars);
@@ -310,10 +311,10 @@ app.get("/u/:id", (req, res) => {
     });
 
     //Add tracking information to URL Database
-    urlObj.tracking.push({ visitorId: visitorId, timestamp: new Date() });
+    const timestamp = new Date();
+    const printDateTime = formatDateTime(timestamp);
+    urlObj.tracking.push({ visitorId: visitorId, timestamp, printDateTime });
   }
-
-  console.log(urlDatabase);
 
   //Redirect to long URL
   res.redirect(longURL);

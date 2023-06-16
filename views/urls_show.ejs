@@ -43,7 +43,7 @@
 
         </div>
 
-        <div class="card-header">Analytics</div>
+        <div class="card-header"></div>
         <div class="card-body">
           <h5 class="card-title">Analytics</h5>
           <br>
@@ -51,11 +51,50 @@
             Date Created: <%= dateCreated %>
             </p>
             <p>
+              Days active: <%= daysActive %>
+            </p>
+            <p>
             Number of visits: <%= countVisits %>
           </p>
           <p>
             Number of unique visitors: <%= countUnique %>
           </p>
+          <br>
+          <style>
+            #tracking-history {
+              text-align: center;
+            }
+          
+            #tracking-history table {
+              margin: 0 auto;
+              width: 50%;
+            }
+          
+            #tracking-history h5 {
+              margin-bottom: 10px;
+            }
+          </style>
+          <div id="tracking-history">
+            <% if (visitHistory && visitHistory.length > 0) { %>
+              <h5>Link Tracking</h5>
+              <br>
+              <table class="table compact-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50%;">Visitor ID</th>
+                    <th style="width: 50%;">Date and Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for (const visit of visitHistory) { %>
+                    <tr>
+                      <td><%= visit["visitorId"] %></td>
+                      <td><%= visit["printDateTime"] %></td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            <% } %>
           </p>
         </div>
 
