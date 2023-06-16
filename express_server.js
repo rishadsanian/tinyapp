@@ -18,6 +18,10 @@ const {
   generateRandomString,
   addHttpToURL,
   countUniqueVisitors,
+  formatDate,
+  formatDateTime,
+  activeDays,
+  formatTracking,
 } = require("./helpers");
 
 //Helper Functions for Error Handling
@@ -70,6 +74,7 @@ const urlDatabase = {
     longURL: "http://www.lighthouselabs.ca",
     userId: "admin1",
     tracking: [],
+    dateCreated: new Date(),
     // countVisits: !this.tracking ? 0 : this.tracking.length,
     // countUniqueVisitors: () => {
     //   return countUniqueVisitors(this.tracking);
@@ -79,6 +84,7 @@ const urlDatabase = {
     longURL: "http://www.google.com",
     userId: "admin1",
     tracking: [],
+    dateCreated: new Date(),
     // countVisits: !this.tracking ? 0 : this.tracking.length,
     // countUniqueVisitors: () => {
     //   return countUniqueVisitors(this.tracking);
@@ -192,6 +198,7 @@ app.post("/urls", (req, res) => {
       longURL: addHttpToURL(req.body.longURL),
       userId: req.session.userID,
       tracking: [],
+      dateCreated: new Date(),
       // countVisits: !this.tracking ? 0 : this.tracking.length,
 
       // countUniqueVisitors: () => {
@@ -228,14 +235,20 @@ app.get("/urls/:id", (req, res) => {
   //Compute analytics
   const countVisits = urlObj.tracking.length;
   const countUnique = countUniqueVisitors(urlObj.tracking);
+  const dateCreated = formatDate(urlObj.dateCreated);
+  const daysActive = activeDays(this.dateCreated);
+  const visitHistory = formatTracking(urlObj.tracking);
 
   //Send to appropriate render view
   const templateVars = {
     id: shortUrl,
-    longURL: urlDatabase[shortUrl].longURL,
+    longURL: urlObj.longURL,
     user: users[req.session.userID],
     countVisits: countVisits,
     countUnique: countUnique,
+    dateCreated,
+    daysActive,
+    visitHistory
   };
 
   res.render("urls_show", templateVars);

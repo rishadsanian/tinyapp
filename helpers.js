@@ -55,7 +55,7 @@ const generateRandomString = (database) => {
 };
 
 //-----------------------------------------------------------------------------
-
+// Counts unique visitor ids from tracking object in url database
 const countUniqueVisitors = (tracking) => {
   const visitorIds = [];
   tracking.forEach((visit) => {
@@ -64,6 +64,64 @@ const countUniqueVisitors = (tracking) => {
     }
   });
   return visitorIds.length;
+};
+
+//-----------------------------------------------------------------------------
+
+//formats new Date timestamp to readable date and time
+
+const formatDateTime = (timestamp) => {
+  const options = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: true,
+  };
+
+  return timestamp.toLocaleString("en-US", options);
+};
+
+//-----------------------------------------------------------------------------
+
+//formats new Date timestamp to readabledate date
+
+const formatDate = (timestamp) => {
+  const options = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+
+  return timestamp.toLocaleString("en-US", options);
+};
+
+//-----------------------------------------------------------------------------
+
+//Returns difference in two date timestamps in days
+
+const activeDays = (dateCreated) => {
+  const date1 = dateCreated;
+  const date2 = new Date("2023-06-20");
+
+  const timeDiff = Math.abs(date2 - date1);
+
+  // return converted milliseconds to days
+  return Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+};
+
+//-----------------------------------------------------------------------------
+
+//Format tracking information to array
+
+const formatTracking = (tracking) => {
+  const output = [];
+  for (const visit in tracking) {
+    output.push(visit["visitorId"], visit[formatDateTime("timestamp")]);
+  }
+  return output;
 };
 
 //-----------------------------------------------------------------------------
@@ -113,4 +171,8 @@ module.exports = {
   handleInvalidUrl,
   handleInvalidCredentials,
   countUniqueVisitors,
+  formatDateTime,
+  formatDate,
+  activeDays,
+  formatTracking
 };

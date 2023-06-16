@@ -22,21 +22,7 @@
           </p>
         </div>
 
-        <div class="card-header"></div>
-        <div class="card-body">
-          <h5 class="card-title">Analytics</h5>
-          <br>
-          <p class="card-text">
-            Number of visits: <%= countVisits %>
-          </p>
-          <p>
-            Number of unique visitors: <%= countUnique %>
-          </p>
-        </div>
-
-
-
-
+        
         <div class="card-footer text-muted">
           <h5 class="card-title">Edit</h4>
           
@@ -54,8 +40,25 @@
               <button type="submit" class="btn btn-primary">Update</button>
             </div>
           </form>
-          
+
         </div>
+
+        <div class="card-header">Analytics</div>
+        <div class="card-body">
+          <h5 class="card-title">Analytics</h5>
+          <br>
+          <p class="card-text">
+            Date Created: <%= dateCreated %>
+            </p>
+            <p>
+            Number of visits: <%= countVisits %>
+          </p>
+          <p>
+            Number of unique visitors: <%= countUnique %>
+          </p>
+          </p>
+        </div>
+
       </div>
     </main>
     <!-- Bootstrap JS -->
