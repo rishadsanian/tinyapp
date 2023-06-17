@@ -76,7 +76,7 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 ```console
  npm install
  ```
-```
+```console
  npm start
  ```
 - Launch the app on your web browser. Defaulted to port 8080 on your localhost
