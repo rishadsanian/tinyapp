@@ -53,10 +53,10 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 !["Screenshot of URLs page](https://github.com/rishadsanian/tinyapp/blob/master/docs/image-urls.png?raw=true)
 <br>
 
-![Alt text](docs/manageURL.png)
+!["Screenshot of Manage URLs page](https://github.com/rishadsanian/tinyapp/blob/master/docs/manageURL.png?raw=true)
 <br>
 
-![Alt text](docs/urls_page.png)
+!["Screenshot of URLs index page"](https://github.com/rishadsanian/tinyapp/blob/master/docs/urls_page.png?raw=true)
 <br>
 
 !["Screenshot of New page"](https://github.com/rishadsanian/tinyapp/assets/77033627/8450a3ea-8bf0-43c2-b1d0-34d54257114c)\
