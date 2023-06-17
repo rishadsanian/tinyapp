@@ -21,7 +21,6 @@ const {
   formatDate,
   formatDateTime,
   activeDays,
-  //formatTracking,
 } = require("./helpers");
 
 //Helper Functions for Error Handling
@@ -234,7 +233,7 @@ app.get("/urls/:id", (req, res) => {
   const countUnique = urlObj.countUnique;
   const dateCreated = formatDate(urlObj.dateCreated);
   const daysActive = urlObj.daysActive;
-  const visitHistory = urlObj.tracking; //formatTracking(urlObj.tracking);
+  const visitHistory = urlObj.tracking;
 
   console.log(visitHistory);
   //Send to appropriate render view
@@ -429,5 +428,3 @@ app.listen(PORT, () => {
 });
 
 ////////////////////////////////////////////////////////////////////////////////
-console.log(urlDatabase);
-console.log(users);

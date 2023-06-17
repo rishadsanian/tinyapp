@@ -115,18 +115,6 @@ const activeDays = (dateCreated) => {
 
 //-----------------------------------------------------------------------------
 
-//Format tracking information to array
-
-const formatTracking = (tracking) => {
-  const output = [];
-  for (const visit in tracking) {
-    output.push(visit["visitorId"], visit[formatDateTime("timestamp")]);
-  }
-  return output;
-};
-
-//-----------------------------------------------------------------------------
-
 //functions to handle 400s status codes
 
 const handleUnauthenticatedUser = (req, res) => {
@@ -175,5 +163,4 @@ module.exports = {
   formatDateTime,
   formatDate,
   activeDays,
-  formatTracking,
 };
