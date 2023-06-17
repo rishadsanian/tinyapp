@@ -46,18 +46,20 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 <br>
 <br>
 
+
 !["Screenshot of Login page](https://github.com/rishadsanian/tinyapp/blob/master/docs/image-login.png?raw=true)
 <br>
 
 !["Screenshot of URLs page](https://github.com/rishadsanian/tinyapp/blob/master/docs/image-urls.png?raw=true)
 <br>
 
-!["Screenshot of Edit page"](https://github.com/rishadsanian/tinyapp/assets/77033627/b2bcdafa-9004-4a3b-b510-7048549afcde)
-
+![Alt text](docs/manageURL.png)
 <br>
 
-!["Screenshot of New page"](https://github.com/rishadsanian/tinyapp/assets/77033627/8450a3ea-8bf0-43c2-b1d0-34d54257114c)
+![Alt text](docs/urls_page.png)
+<br>
 
+!["Screenshot of New page"](https://github.com/rishadsanian/tinyapp/assets/77033627/8450a3ea-8bf0-43c2-b1d0-34d54257114c)\
 <br>
 
 !["Screenshot of Register page"](https://github.com/rishadsanian/tinyapp/blob/master/docs/image-register.png?raw=true)
@@ -74,9 +76,13 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 ```console
  npm install
  ```
-```console
+```
  npm start
  ```
+- Launch the app on your web browser. Defaulted to port 8080 on your localhost
+``` 
+http://localhost:8080/
+```
  <br>
  
 ### Express Server
