@@ -34,6 +34,7 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 
 ## Features
 - Permits the user to create, read, update, and delete short-URLs and their corresponding long-URLs
+- Analytics to track visits on short Url link.
 - HTTP Server that handles requests from the browser (client)
 - Authentication protection
 - Reacts appropriately to the user's logged-in state
@@ -88,26 +89,31 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 
 ### Middleware
   - Nodemon - Auto server restart for code changes and viewing console.logs
-  - Morgan - For live monitoring of event status
+  - Morgan - Live monitoring of event status
   - EJS  - Viewengine used to generate dynamic views with the capacity to manipulate data within HTML code
+  - Method-override to handle puts and deletes
 <br>
 <br>
 
 ### Security and Authentication
 - Bcrypt 
-  -Used for generating salt used in hashing and in keys for cookie sessions
-  -Used for hashing and validating passwords
-
+  - Used for generating salt used in hashing and in keys for cookie sessions
+  - Used for hashing and validating passwords
+<br>
+<Br>
 - Cookie-session - Used to encrypt cookies
 <br>
 <br> 
 
 ### Helper Functions
   - ``` findUserByEmail ```: Checks if an email exists in the user database and returns the user id or null
-  - ``` urlsForUser```: Returns the URLs for the specific logged-in user
+  - ``` urlsForUser```: Returns the URLs for the specific logged-in user along with URL analytics
   - ```addHttpToURL```: Adds http:// to submitted links only if http:// or https:// is missing
-  - ```generateRandomString```: Generates a random string that is 6 characters in length used for short URLs and user ids
-
+  - ```generateRandomString```: Generates a random string that is 6 characters in length used for short URLs, user ids and visitor ids
+  - ```countUniqueVisitors```: Computes unique visitors that use the short URL Does not count clicks by the user/owner of the short URL.
+  - ```formatDateTime```: Converts timestamp (``` new Date```) in to a more readable date and time format
+  - ```formatDate```: Converts timestamp (```new Date```) in to a more readable date format
+  - ```activeDays```: Calculates the number of days the short URL has been active for
   - ```handleUnauthenticatedUser```,
   ```handleUnauthorizedAccess```,
   ```handleInvalidUrl```,
@@ -129,8 +135,7 @@ EJS | HTML | CSS
 <br>
 
 ## Future Features
-- Analytics on the number of visits and unique visits on short URL
-- Date of short URL creation
 - Database integration
+- Further development of analytics section
 - Error view page with dynamic messaging based on error code/handler
 - Copy short URL button from urlshow/urls index page
