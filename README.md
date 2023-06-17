@@ -1,7 +1,8 @@
 
 <br>
 
-![TinyApp](docs/tiny-image.png)
+![TinyApp](https://github.com/rishadsanian/tinyapp/assets/77033627/f326b8b0-6657-46bd-9d85-dc1b25469624)
+
 
 # 
 <br>
@@ -32,7 +33,7 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 <br>
 
 ## Features
-- Permits the user to create, read, update, and delete short-urls and their corresponding long-urls
+- Permits the user to create, read, update, and delete short-URLs and their corresponding long-URLs
 - HTTP Server that handles requests from the browser (client)
 - Authentication protection
 - Reacts appropriately to the user's logged-in state
@@ -44,19 +45,22 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 <br>
 <br>
 
-![Login](docs/image-login.png)
+!["Screenshot of Login page](https://github.com/rishadsanian/tinyapp/blob/master/docs/image-login.png?raw=true)
 <br>
 
-![URLs](docs/image-urls.png)
+!["Screenshot of URLs page](https://github.com/rishadsanian/tinyapp/blob/master/docs/image-urls.png?raw=true)
 <br>
 
-![Edit](docs/image-edit.png)
+!["Screenshot of Edit page"](https://github.com/rishadsanian/tinyapp/assets/77033627/b2bcdafa-9004-4a3b-b510-7048549afcde)
+
 <br>
 
-![Add New](docs/image-new.png)
+!["Screenshot of New page"](https://github.com/rishadsanian/tinyapp/assets/77033627/8450a3ea-8bf0-43c2-b1d0-34d54257114c)
+
 <br>
 
-![Register](docs/image-register.png)
+!["Screenshot of Register page"](https://github.com/rishadsanian/tinyapp/blob/master/docs/image-register.png?raw=true)
+
 <br>
 <br>
 
@@ -64,9 +68,13 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 
 <br>
 
-### Node
- ```console
- npm sart
+### Node 
+- To get started, install all dependencies and start the server
+```console
+ npm install
+ ```
+```console
+ npm start
  ```
  <br>
  
@@ -81,7 +89,7 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 ### Middleware
   - Nodemon - Auto server restart for code changes and viewing console.logs
   - Morgan - For live monitoring of event status
-  - EJS  - Viewengine used to generate dynamic views with capacity to manipulate data within html code
+  - EJS  - Viewengine used to generate dynamic views with the capacity to manipulate data within HTML code
 <br>
 <br>
 
@@ -96,32 +104,33 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
 
 ### Helper Functions
   - ``` findUserByEmail ```: Checks if an email exists in the user database and returns the user id or null
-  - ``` urlsForUser```: Returns the URLs for the specific logged in user
+  - ``` urlsForUser```: Returns the URLs for the specific logged-in user
   - ```addHttpToURL```: Adds http:// to submitted links only if http:// or https:// is missing
-  - ```generateRandomString```: function that generates random string that is 6 characters in length used for short urls and user ids
+  - ```generateRandomString```: Generates a random string that is 6 characters in length used for short URLs and user ids
 
   - ```handleUnauthenticatedUser```,
   ```handleUnauthorizedAccess```,
   ```handleInvalidUrl```,
-  ```handleInvalidCredentials``` : Error code handler functions to handle various status codes
+  ```handleInvalidCredentials```: Error code handler functions to handle various status codes
 <br>
 <br>
 
 ### Functions Testing
-- Mocha and Chai  - assert.deepStrictEqual is used to compare functions that return objects
+- Mocha and Chai  - ```assert.deepStrictEqual``` is used to compare functions that return objects
 <br>
 <br>
 
-### Styling - EJS | HTML | CSS
+### Styling 
+EJS | HTML | CSS
 - Views and partials made with ejs files
--  Basic css styling provided using bootstrap 
-- Created buttons, forms and additonal elements with custom css styling to keep it consistent with existing style attributes
+-  Basic CSS styling provided using Bootstrap 
+- Created buttons, forms and additional elements with custom CSS styling to keep them consistent with existing style attributes
 <br>
 <br>
 
 ## Future Features
-- Analytics on number of visits and unique visits on short URL
-- Date of short url creation
+- Analytics on the number of visits and unique visits on short URL
+- Date of short URL creation
 - Database integration
 - Error view page with dynamic messaging based on error code/handler
-- Copy shorturl button from urlshow/urls index page
+- Copy short URL button from urlshow/urls index page
