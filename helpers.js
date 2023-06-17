@@ -37,6 +37,7 @@ const addHttpToURL = (url) => {
 };
 
 //------------------------------------------------------------------------------
+
 //generates a random short url string  - used for generating short url and userid
 const generateRandomString = (database) => {
   const characters =
@@ -55,6 +56,7 @@ const generateRandomString = (database) => {
 };
 
 //-----------------------------------------------------------------------------
+
 // Counts unique visitor ids from tracking object in url database
 const countUniqueVisitors = (tracking) => {
   const visitorIds = [];
