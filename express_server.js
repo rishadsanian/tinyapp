@@ -235,7 +235,7 @@ app.get("/urls/:id", (req, res) => {
   const daysActive = urlObj.daysActive;
   const visitHistory = urlObj.tracking;
 
-  console.log(visitHistory);
+
   //Send to appropriate render view
   const templateVars = {
     id: shortUrl,
