@@ -9,9 +9,9 @@
 
 ## Overview
 
-TinyApp, built with Node and Express, is a full stack, multi-page, server-side rendering web application that enables users to shorten long URLs, similar to services like TinyURL.com and bit.ly. 
+TinyApp, built with Node and Express, is a multi-page, server-side rendering web application that enables users to shorten long URLs, similar to services like TinyURL.com and bit.ly. 
 
-This project has been completed by [Rishad Alam](https://github.com/rishadsanian) for the [Lighthouse Labs](https://www.lighthouselabs.ca/) Web Development Bootcamp.
+This full stack has been completed by [Rishad Alam](https://github.com/rishadsanian) for the [Lighthouse Labs](https://www.lighthouselabs.ca/) Web Development Bootcamp.
 <br>
 <br>
 
@@ -80,7 +80,7 @@ This project has been completed by [Rishad Alam](https://github.com/rishadsanian
  npm start
  ```
 - Launch the app on your web browser. Defaulted to port 8080 on your localhost
-``` 
+``` url
 http://localhost:8080/
 ```
  <br>
