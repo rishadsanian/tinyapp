@@ -7,7 +7,7 @@
 //Modules, Packages and files required
 const express = require("express");
 const cookieSession = require("cookie-session");
-const bcrypt = require("bcryptjs"); //question
+const bcrypt = require("bcryptjs");
 const morgan = require("morgan");
 const methodOverride = require("method-override");
 

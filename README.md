@@ -9,7 +9,7 @@
 
 ## Overview
 
-TinyApp, built with Node and Express, is a multi-page, server-side rendering web application that enables users to shorten long URLs, similar to services like TinyURL.com and bit.ly. 
+TinyApp, built with Node, Express, and EJS is a multi-page, server-side rendering web application that enables users to shorten long URLs, similar to services like TinyURL.com and bit.ly. 
 
 This full stack has been completed by [Rishad Alam](https://github.com/rishadsanian) for the [Lighthouse Labs](https://www.lighthouselabs.ca/) Web Development Bootcamp.
 <br>
